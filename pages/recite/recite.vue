@@ -26,18 +26,12 @@
     </view>
 
 
-    <!-- 底部输入框和按钮 -->
     <view class="bottom-bar">
-      <input class="input-box" type="text" placeholder="请输入古诗文名字" v-model="inputValue" value="inputValue" value="inputValue"  @confirm="handleEnter" />
-      <button class="enter-button" @tap="handleEnter">
-      <image class="enter-icon"  mode="aspectFit"></image>
-    </button>
+      <input class="input-box" type="text" placeholder="请输入古诗文名字" v-model="inputValue" @confirm="handleEnter" />
+      <button class="enter-button" @tap="handleEnter"></button>
     </view>
+	</view>
 
-   
-   
-   
-  </view>
 </template>
 
 <script>
