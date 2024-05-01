@@ -16,6 +16,7 @@
             "autoclose" : true,
             "delay" : 0
         },
+		"nvueStyleCompiler" : "uni-app",
         /* 模块配置 */
         "modules" : {},
         /* 应用发布信息 */
@@ -41,11 +42,13 @@
                 ]
             },
             /* ios打包配置 */
-            "ios" : {},
+            "ios" : {
+                "dSYMs" : false
+            },
             /* SDK配置 */
-            "sdkConfigs" : {}
-				
-
+            "sdkConfigs" : {
+                "ad" : {}
+            }
         }
     },
     /* 快应用特有相关 */
@@ -71,19 +74,20 @@
         "enable" : false
     },
     "vueVersion" : "3",
-	"h5" : {
-		"devServer" : {
-			 "port" : 8080, //浏览器运行端口
-			  "disableHostCheck" : true, //设置跳过host检查
-			  "proxy" : {
-				  "/api" : {
-					  "target" : "http://localhost:8080", //目标接口域名
-					   "changeOrigin" : true,  //是否跨域
-					   "secure" : false,  // 设置支持https协议的代理
-										 "pathRewrite":{"^/api":""}
-				 }
-			}
-		}
-	}
-
+    "h5" : {
+        "devServer" : {
+            "port" : 8080, //浏览器运行端口
+            "disableHostCheck" : true, //设置跳过host检查
+            "proxy" : {
+                "/api" : {
+                    "target" : "http://localhost:8080", //目标接口域名
+                    "changeOrigin" : true, //是否跨域
+                    "secure" : false, // 设置支持https协议的代理
+                    "pathRewrite" : {
+                        "^/api" : ""
+                    }
+                }
+            }
+        }
+    }
 }
