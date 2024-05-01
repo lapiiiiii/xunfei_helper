@@ -1,268 +1,217 @@
 <template>
-	<view class="chat">
-		<scroll-view  :style="{height: `${windowHeight}rpx`}"
-		id="scrollview"
-		scroll-y="true" 
-		:scroll-top="scrollTop"
-		:scroll-with-animation="true"
-		class="scroll-view"
-		>
-			<!-- 聊天主体 -->
-			<view id="msglistview" class="chat-body">
-				<!-- 聊天记录 -->
-				<view v-for="(item,index) in msgList" :key="index">
-					<!-- 自己发的消息 -->
-					<view class="item self" v-if="item.userContent != ''" >
-						<!-- 文字内容 -->
-						<view class="content right">
-						{{item.userContent}}
-						</view>
-						<!-- 头像 -->
-						<view class="avatar">
-						</view>
-					</view>
-					<!-- 机器人发的消息 -->
-					<view class="item Ai" v-if="item.botContent != ''">
-						<!-- 头像 -->     
-						<view class="avatar">
-						</view>
-						<!-- 文字内容 -->
-						<view class="content left">
-							{{item.botContent}}
-						</view>
-					</view>
-				</view>
+	<view class="diagnosis">
+		<!-- 录制时长输入框 -->
+		<view class="recordinput">
+			<uni-easyinput class='input' type="number" v-model="duration" placeholder="请输入录制时长" />
+		</view>
+		<text>S</text>
+
+		<!-- /录制按钮 -->
+		<view class="start" @tap="startRecord()">
+			<image src="../../static/录音 (选中).png" class="image"></image>
+			开始录音
+		</view>
+		<view v-show="show">
+			<!-- 进度条效果 -->
+			<!-- <view>进度条</view> -->
+			<!-- 回放以及上传按钮 -->
+			<view class="butt" @tap="playVoice()">
+				<uni-icons type="sound-filled" size="30"></uni-icons>
+				回放录音
 			</view>
-		</scroll-view>
-		<!-- 底部消息发送栏 -->
-		<!-- 用来占位，防止聊天消息被发送框遮挡 -->
-		<view class="chat-bottom">
-			<view class="send-msg">
-                <view class="uni-textarea">
-					<textarea v-model="chatMsg"
-					  maxlength="300"
-					  :show-confirm-bar="false"
-					 auto-height></textarea>
-				</view>
-				<button @click="handleSend" class="send-btn">发送</button>
+			<view class="butt" @tap="submitrecord()">
+				<uni-icons type="upload-filled" size="30"></uni-icons>
+				上传录音
 			</view>
+		</view>
+		<!-- 弹出层 -->
+		<view>
+			<uni-popup ref="popup" :mask-click="false" type="center" background-color="#fff">
+				<view class="time">
+					{{second}}/{{duration}}
+				</view>
+				<view class="start" @tap="endRecord()">
+					<image src="../../static/录音 .png" class="image"></image>
+					停止录音
+				</view>
+			</uni-popup>
 		</view>
 	</view>
 </template>
+
 <script>
+	const recorderManager = uni.getRecorderManager();
+	const innerAudioContext = uni.createInnerAudioContext();
+	innerAudioContext.autoplay = true;
+
 	export default {
 		data() {
 			return {
-				//滚动距离
-				scrollTop: 0,
-				userId:'',
-				//发送的消息
-				chatMsg:"",
-				msgList:[
-					{
-					    botContent: "hello，请问我有什么可以帮助你的吗？",
-					    recordId: 0,
-					    titleId: 0,
-					    userContent: "",
-					    userId: 0
-					},
-					{
-					    botContent: "",
-					    recordId: 0,
-					    titleId: 0,
-					    userContent: "你好呀我想问你一件事",
-					    userId: 0
-					},
-				]	
+				//回放和上传是否显示
+				show: false,
+				//录制时长
+				duration: '',
+				//录制音频路径
+				voicePath: '',
+				//计时器
+				timer: '',
+				//计时器秒数
+				second: 0,
 			}
 		},
-		computed: {
-			windowHeight() {
-			    return this.rpxTopx(uni.getSystemInfoSync().windowHeight)
-			}
+		onLoad() {
+			let self = this;
+			recorderManager.onStop(function(res) {
+				console.log('recorder stop' + JSON.stringify(res));
+				self.voicePath = res.tempFilePath;
+			});
 		},
 		methods: {
-			// px转换成rpx
-			rpxTopx(px){
-				let deviceWidth = wx.getSystemInfoSync().windowWidth
-				let rpx = ( 750 / deviceWidth ) * Number(px)
-				return Math.floor(rpx)
-			},
-			// 发送消息
-			handleSend() {
-				//如果消息不为空
-				if(!this.chatMsg||!/^\s+$/.test(this.chatMsg)){
-					let obj = {
-						botContent: "",
-						recordId: 0,
-						titleId: 0,
-						userContent: this.chatMsg,
-						userId: 0
+			// 计时器方法
+			getTimeIntervalplus() {
+				//初始化秒数
+				this.second = 0
+				//首先清除所有计时器
+				clearInterval(this.timer);
+				//设定一个计时器,将计时器的编号赋值给this.timer
+				this.timer = setInterval(() => {
+					//延迟的时间设为一秒,所以每过一秒,this.second加一
+					this.second += 1;
+					//判断当秒数大于等于输入框设定的秒数的时候
+					if (this.second >= this.duration) {
+						//停止录音
+						recorderManager.stop();
+						//清除计时器
+						clearInterval(this.timer);
+						//关闭弹出层
+						this.$refs.popup.close('bottom')
+						console.log('录音结束')
+						this.show = true
 					}
-					this.msgList.push(obj);
-					this.chatMsg = '';
-				}else {
-					this.$modal.showToast('不能发送空白消息')
+				}, 1000);
+			},
+			startRecord() {
+				//首先对输入框中输入的数字进行判断
+				if (this.duration >= 3 && this.duration <= 10) {
+					// 点击开始录音
+					console.log('开始录音');
+					this.$refs.popup.open('bottom')
+					//将输入框中的数字进行加工成单位为ms的
+					var tims = this.duration * 1000
+					//封装的一个计时器,调用开始计时
+					this.getTimeIntervalplus();
+					const options = {
+						//指定录音的时长
+						duration: tims,
+						//采样率
+						sampleRate: 44100,
+						//录音通道数
+						numberOfChannels: 1,
+						//编码码率
+						encodeBitRate: 192000,
+						//音频格式
+						format: 'mp3',
+						//指定帧大小
+						frameSize: 50
+					}
+					console.log(options)
+					recorderManager.start(options);
+				} else {
+					uni.showToast({
+						title: '录制时长在3-10S之间',
+						icon: 'none',
+						duration: 2000
+					});
 				}
 			},
+			endRecord() {
+				console.log('录音结束');
+				recorderManager.stop(); //结束录音
+				clearInterval(this.timer); //清除计时器
+				//关闭弹出层
+				this.$refs.popup.close('bottom')
+				this.show = true
+			},
+			playVoice() {
+				console.log('播放录音');
+				console.log(this.voicePath)
+				//如果有录音文件的话,将文件赋值给innerAudioContext.src进行播放
+				if (this.voicePath) {
+					innerAudioContext.src = this.voicePath;
+					innerAudioContext.play();
+				}
+			},
+			submitrecord() {
+				console.log('上传录音')
+				console.log(this.duration)
+
+			}
 		}
 	}
 </script>
+
 <style lang="scss" scoped>
-	
-	$chatContentbgc: #C2DCFF;
-	$sendBtnbgc: #4F7DF5;
-	
-	view,button,text,input,textarea {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
+	.diagnosis {
+		width: 86%;
+		margin: auto;
 	}
 
-	/* 聊天消息 */
-	.chat {
-		.scroll-view {
-			::-webkit-scrollbar {
-					    display: none;
-					    width: 0 !important;
-					    height: 0 !important;
-					    -webkit-appearance: none;
-					    background: transparent;
-					    color: transparent;
-					  }
-			
-			// background-color: orange;
-			background-color: #F6F6F6;
-			
-			.chat-body {
-				display: flex;
-				flex-direction: column;
-				padding-top: 23rpx;
-				// background-color:skyblue;
-				
-				.self {
-					justify-content: flex-end;
-				}
-				.item {
-					display: flex;
-					padding: 23rpx 30rpx;
-					// background-color: greenyellow;
+	.recordinput {
+		display: inline-block;
+		width: 80%;
+		margin: 300rpx 20rpx 100rpx 50rpx;
+	}
 
-					.right {
-						background-color: $chatContentbgc;
-					}
-					.left {
-						background-color: #FFFFFF;
-					}
-                    // 聊天消息的三角形
-					.right::after {
-						position: absolute;
-						display: inline-block;
-						content: '';
-						width: 0;
-						height: 0;
-						left: 100%;
-						top: 10px;
-						border: 12rpx solid transparent;
-						border-left: 12rpx solid $chatContentbgc;
-					}
+	.start {
+		width: 50%;
+		margin: 50rpx auto;
+		font-size: 16px;
+		color: #666666;
+		height: 80rpx;
+		border: 1px solid;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		border-color: #b8b8b8;
+		border-radius: 10rpx;
+		font-family: "楷体";
+		justify-content: center;
 
-					.left::after {
-						position: absolute;
-						display: inline-block;
-						content: '';
-						width: 0;
-						height: 0;
-						top: 10px;
-						right: 100%;
-						border: 12rpx solid transparent;
-						border-right: 12rpx solid #FFFFFF;
-					}
+	}
 
-					.content {
-						position: relative;
-						max-width: 486rpx;
-						border-radius: 8rpx;
-						word-wrap: break-word;
-						padding: 24rpx 24rpx;
-						margin: 0 24rpx;
-						border-radius: 5px;
-						font-size: 32rpx;
-						font-family: PingFang SC;
-						font-weight: 500;
-						color: #333333;
-						line-height: 42rpx;
-					}
+	.start image {
+		margin-left: 10rpx;
+		margin-right: 10rpx;
+		width: 35rpx;
+		height: 35rpx;
+	}
 
-					.avatar {
-						display: flex;
-						justify-content: center;
-						width: 78rpx;
-						height: 78rpx;
-						background: $sendBtnbgc;
-						border-radius: 8rpx;
-						overflow: hidden;
-						
-						image {
-							align-self: center;
-						}
+	.butt {
+		width: 50%;
+		margin: 50rpx auto;
+		font-size: 16px;
+		color: #666666;
+		height: 80rpx;
+		border: 1px solid;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		border-color: #b8b8b8;
+		border-radius: 10rpx;
+		font-family: "楷体";
+		justify-content: center;
+	}
 
-					}
-				}
-			}
-		}
 
-		/* 底部聊天发送栏 */
-		.chat-bottom {
-			width: 100%;
-			height: 177rpx;
-			background: #F4F5F7;
-
-			.send-msg {
-				display: flex;
-				align-items: flex-end;
-				padding: 16rpx 30rpx;
-				width: 100%;
-				min-height: 177rpx;
-				position: fixed;
-				bottom: 0;
-				background: #EDEDED;
-			}
-
-			.uni-textarea {
-				padding-bottom: 70rpx;
-                
-				textarea {
-					width: 537rpx;
-					min-height: 75rpx;
-					max-height: 500rpx;
-					background: #FFFFFF;
-					border-radius: 8rpx;
-					font-size: 32rpx;
-					font-family: PingFang SC;
-					color: #333333;
-					line-height: 43rpx;
-					padding: 5rpx 8rpx;
-				}
-			}
-            
-			.send-btn {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				margin-bottom: 70rpx;
-				margin-left: 25rpx;
-				width: 128rpx;
-				height: 75rpx;
-				background: $sendBtnbgc;
-				border-radius: 8rpx;
-				font-size: 28rpx;
-				font-family: PingFang SC;
-				font-weight: 500;
-				color: #FFFFFF;
-				line-height: 28rpx;
-			}
-		}
-		
+	.time {
+		width: 50%;
+		margin: 10rpx auto;
+		font-size: 22px;
+		height: 80rpx;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		font-family: "楷体";
+		justify-content: center;
 	}
 </style>

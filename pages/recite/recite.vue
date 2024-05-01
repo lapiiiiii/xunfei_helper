@@ -23,6 +23,26 @@
         </view>
       </view>
     </scroll-view>
+	
+	
+	<view class="content">
+	<button class="record" @click="show = true">语音录制</button>
+	<view class="popup-bottom" v-if="show">
+	  <view class="popup-bg" @click="show = false"></view>
+	  <view class="popup-content">
+	    <sound-recording
+	      :maximum="36000"
+	      :duration="100"
+	      @cancel="show = false"
+	      @confirm="onUpload">
+	    </sound-recording>
+	  </view>
+	</view>
+	</view>
+	
+	
+	
+	
     <!-- 底部消息发送栏 -->
     <!-- 用来占位，防止聊天消息被发送框遮挡 -->
     <view class="chat-bottom">
@@ -39,9 +59,8 @@
     </view>
   </view>
 </template>
-
-
 <script>
+	
 import { baseUrl } from '@/config.js';
 
 export default {
@@ -55,7 +74,9 @@ export default {
           robot: ""
         }
       ],
-      inputValue: ""
+      inputValue: "",
+      show: false,
+      voicePath: ''
     };
   },
   computed: {
@@ -105,10 +126,45 @@ export default {
           }
         });
       });
+    },
+    onEndRecoder () {
+      recorderManager.stop();
+      recorderManager.onStop(({ tempFilePath }) => {
+        this.voicePath = tempFilePath;
+      });
+    },
+    // 在 confirm 方法中触发上传录音文件的操作
+    confirm() {
+      if (!innerAudioContext.paused) {
+        innerAudioContext.stop();
+      }
+      // 触发上传录音文件的操作
+      this.onUpload();
+    },
+    // 上传录音文件到服务器
+    onUpload() {
+      const url = baseUrl+':8088/audio';
+      const filePath = this.voicePath;
+      uni.uploadFile({
+        url: url,
+        filePath: filePath,
+        name: 'file',
+        success: (uploadRes) => {
+          // 上传成功
+          const data = uploadRes.data;
+          // 在这里处理服务器返回的数据
+          console.log('上传成功，服务器返回的数据：', data);
+        },
+        fail: (err) => {
+          // 上传失败
+          console.error('上传失败：', err);
+        }
+      });
     }
   }
 };
 </script>
+
 
 
 
@@ -237,5 +293,37 @@ $sendBtnbgc: #4F7DF5;
       line-height: 28rpx;
     }
   }
+  
+  .content {
+    padding: 30rpx;
+  }
+  .popup-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    .popup-bg {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    .popup-content {
+      height: 40%;
+      margin-top: auto;
+      background-color: #fff;
+      position: relative;
+      z-index: 11;
+    }
+  }
+  
+  
+  
 }
 </style>
