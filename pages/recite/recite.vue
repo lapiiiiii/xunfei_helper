@@ -18,7 +18,7 @@
           <!-- 机器人发的消息 -->
           <view class="item Ai" v-if="item.robot!=''" >
             <!-- 文字内容 -->
-            <view class="content left">{{ item.robot }}</view>
+            <view class="content left" v-html="item.robot"></view>
           </view>
         </view>
       </view>
