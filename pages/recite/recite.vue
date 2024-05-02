@@ -127,33 +127,18 @@ export default {
         });
       });
     },
-    onEndRecoder () {
-      recorderManager.stop();
-      recorderManager.onStop(({ tempFilePath }) => {
-        this.voicePath = tempFilePath;
-      });
-    },
-    // 在 confirm 方法中触发上传录音文件的操作
-    confirm() {
-      if (!innerAudioContext.paused) {
-        innerAudioContext.stop();
-      }
-      // 触发上传录音文件的操作
-      this.onUpload();
-    },
+   
     // 上传录音文件到服务器
-    onUpload() {
-      const url = baseUrl+':8088/audio';
-      const filePath = this.voicePath;
+    onUpload(tempFilePath) {
       uni.uploadFile({
-        url: url,
-        filePath: filePath,
+        url: baseUrl+':8088/audiotest',
+        filePath: tempFilePath,
         name: 'file',
         success: (uploadRes) => {
           // 上传成功
           const data = uploadRes.data;
           // 在这里处理服务器返回的数据
-          console.log('上传成功，服务器返回的数据：', data);
+          console.log('上传成功，服务器数据：', data);
         },
         fail: (err) => {
           // 上传失败

@@ -7,9 +7,7 @@
     <text class="title">{{ finish ? '点击播放' : '长按录制语音' }}</text>
     <view class="recorder-box" 
       v-if="!finish"
-      @click="handle"
-      @longpress="onStartRecoder" 
-      @touchend="onEndRecoder">
+      @click="handle">
       <u-circle-progress :active-color="theme" :duration="0" :percent="calcProgress">
         <view class="u-progress-content">
           <image src="/static/sound-recording/voice.png" mode="aspectFit" :style="{
@@ -80,7 +78,7 @@
     },
 		data() {
 			return {
-				reDate: '00:00',
+        reDate: '00:00',
         sec: 0,
         min: 0,
         finish: false,
@@ -88,39 +86,40 @@
         playProgress: 100,
         playTimer: null,
         timer: null,
-        playStatus: false
+        playStatus: false,
+        isRecording: false // 录音状态变量
 			};
 		},
     created () {
-      // 监听
       this.onMonitorEvents()
     },
     computed: {
-      // 录制时间计算
       calcProgress () {
         return (this.sec + (this.min * 60)) / this.maximum * 100
       }
     },
     methods: {
-      // 完成事件
       confirm () {
         if (!innerAudioContext.paused) {
           innerAudioContext.stop()
         }
         this.$emit('confirm', this.voicePath)
       },
-      // 取消事件
       cancel () {
         if (!innerAudioContext.paused) {
           innerAudioContext.stop()
         }
         this.$emit('cancel')
       },
-      // 点击事件
       handle () {
-        this.$emit('click')
+        if (!this.isRecording) { // 如果不在录音状态，开始录音
+          this.onStartRecoder();
+          this.isRecording = true;
+        } else { // 如果在录音状态，停止录音
+          this.onEndRecoder();
+          this.isRecording = false;
+        }
       },
-      // 重新录制
       reset () {
         this.voicePath = ''
         this.min = 0
@@ -130,7 +129,6 @@
         this.finish = false
         this.$emit('reset')
       },
-      // 播放暂停录音
       playVoice() {
         innerAudioContext.src = this.voicePath;
         
@@ -142,19 +140,15 @@
         }
         this.$emit('playVoice', innerAudioContext.paused)
       },
-      // 录制结束
       onEndRecoder () {
         recorderManager.stop()
       },
-      // 开始录制
       onStartRecoder () {
         recorderManager.start({
           duration: this.maximum * 1000
         })
       },
-      // 监听
       onMonitorEvents () {
-        // 录制开始
         recorderManager.onStart(() => {
           uni.showLoading({
             title: '录制中...'
@@ -162,7 +156,6 @@
           this.startDate()
           this.$emit('start')
         })
-        // 录制结束
         recorderManager.onStop(({ tempFilePath }) => {
           this.voicePath = tempFilePath
           clearInterval(this.timer)
@@ -170,7 +163,6 @@
           this.finish = true
           this.$emit('end')
         })
-        // 播放进度
         innerAudioContext.onTimeUpdate(() => {
           let totalDate = innerAudioContext.duration
           let nowTime = innerAudioContext.currentTime
@@ -183,14 +175,12 @@
           if (_sec < 10) _sec = '0' + _sec;
           this.reDate = _min + ':' + _sec
         })
-        // 播放暂停
         innerAudioContext.onPause(() => {
           this.resetDate()
           this.playProgress = 100
           this.playStatus = false
           console.log('播放暂停')
         })
-        // 播放停止
         innerAudioContext.onStop(() => {
           this.resetDate()
           this.playProgress = 100
@@ -199,7 +189,6 @@
           this.$emit('stop')
         })
       },
-      // 录音计时
       startDate () {
         clearInterval(this.timer)
         this.sec = 0
@@ -213,7 +202,6 @@
           this.resetDate()
         }, this.duration)
       },
-      // 播放时间
       resetDate () {
         let _s = this.sec < 10 ? '0' + parseInt(this.sec) : parseInt(this.sec)
         let _m = this.min < 10 ? '0' + this.min : this.min
