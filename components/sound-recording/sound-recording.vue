@@ -4,7 +4,7 @@
       <view class="re-cancel" @click="cancel">取消</view>
       <view class="re-confirm" :style="{color: theme}" @click="confirm">{{ confirmText }}</view>
     </view>
-    <text class="title">{{ finish ? '点击播放' : '长按录制语音' }}</text>
+    <text class="title">{{ finish ? '点击播放' : '点击录制语音' }}</text>
     <view class="recorder-box" 
       v-if="!finish"
       @click="handle">
