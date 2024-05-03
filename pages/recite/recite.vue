@@ -111,7 +111,7 @@ export default {
     queryPoetry(poetryName) {
       return new Promise((resolve, reject) => {
         uni.request({
-          url: baseUrl + ":8088/poem",
+          url: baseUrl + "/poem",
           method: "GET",
           data: {
             title: poetryName.trim()
@@ -131,7 +131,7 @@ export default {
     // 上传录音文件到服务器
     onUpload(tempFilePath) {
       uni.uploadFile({
-        url: baseUrl+':8088/audiotest',
+        url: baseUrl+'/audiotest',
         filePath: tempFilePath,
         name: 'file',
         success: (uploadRes) => {

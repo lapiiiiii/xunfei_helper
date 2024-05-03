@@ -17,7 +17,7 @@
         </view>
       </u-circle-progress>
     </view>
-    <view class="recorder-box" 
+    <view class="recorder-box"
       v-else
       @click="playVoice">
       <u-circle-progress :active-color="theme" :duration="0" :percent="playProgress">
@@ -145,7 +145,8 @@
       },
       onStartRecoder () {
         recorderManager.start({
-          duration: this.maximum * 1000
+          duration: this.maximum * 1000,
+          format: 'pcm'
         })
       },
       onMonitorEvents () {
