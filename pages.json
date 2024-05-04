@@ -4,6 +4,7 @@
 			"path": "pages/recite/recite",
 			"style": {
 				"navigationStyle":"custom",
+				"enablePullDownRefresh": false,
 				"navigationBarTitleText": "背诵助手"
 			}
 		},

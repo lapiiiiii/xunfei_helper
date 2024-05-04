@@ -1,82 +1,96 @@
+
 <template>
-  <view class="chat">
-    <scroll-view :style="{height: `${windowHeight}rpx`}"
-                 id="scrollview"
-                 scroll-y="true"
-                 :scroll-top="scrollTop"
-                 :scroll-with-animation="true"
-                 class="scroll-view">
-      <!-- 聊天主体 -->
-      <view id="msglistview" class="chat-body">
-        <!-- 聊天记录 -->
-        <view v-for="(item,index) in list" :key="index"  >
-          <!-- 自己发的消息 -->
-          <view class="item self" v-if="item.me!=''">
-            <!-- 文字内容 -->
-            <view class="content right">{{ item.me }}</view>
-          </view>
-          <!-- 机器人发的消息 -->
-          <view class="item Ai" v-if="item.robot!=''" >
-            <!-- 文字内容 -->
-            <view class="content left" v-html="item.robot"></view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-	
-	
-	<view class="content">
-	<button class="record" @click="show = true">语音录制</button>
-	<view class="popup-bottom" v-if="show">
-	  <view class="popup-bg" @click="show = false"></view>
-	  <view class="popup-content">
-	    <sound-recording
-	      :maximum="36000"
-	      :duration="100"
-	      @cancel="show = false"
-	      @confirm="onUpload">
-	    </sound-recording>
-	  </view>
-	</view>
-	</view>
-	
-	
-	
-	
-    <!-- 底部消息发送栏 -->
-    <!-- 用来占位，防止聊天消息被发送框遮挡 -->
-    <view class="chat-bottom">
-      <view class="send-msg">
-        <view class="uni-textarea">
-          <textarea v-model="inputValue"
-                    maxlength="300"
-                    :show-confirm-bar="false"
-                    auto-height
-                    placeholder="请输入古诗文的名字"></textarea>
-        </view>
-        <button @click="handleEnter" class="send-btn">发送</button>
-      </view>
-    </view>
-  </view>
+  <div>
+    <navBar titleName="背诵助手" />	
+    <div class="chat">
+      <scroll-view :style="{height: `${windowHeight}rpx`}"
+                   id="scrollview"
+                   scroll-y="true"
+                   :scroll-top="scrollTop"
+                   :scroll-with-animation="true"
+                   class="scroll-view">
+        <!-- 聊天主体 -->
+        <div id="msglistview" class="chat-body">
+          <!-- 聊天记录 -->
+          <div v-for="(item,index) in list" :key="index">
+            <!-- 自己发的消息 -->
+            <div class="item self" v-if="item.me !== ''">
+              <!-- 文字内容 -->
+              <div class="content right">{{ item.me }}</div>
+            </div>
+            <!-- 机器人发的消息 -->
+            <div class="item Ai" v-if="item.robot !== ''">
+              <!-- 文字内容 -->
+              <div class="content left" v-html="item.robot"></div>
+            </div>
+          </div>
+        </div>
+      </scroll-view>
+      
+      <div class="content">
+        <button class="record" @click="show = true">语音录制</button>
+        <div class="popup-bottom" v-if="show">
+          <div class="popup-bg" @click="show = false"></div>
+          <div class="popup-content">
+            <sound-recording
+              :maximum="36000"
+              :duration="100"
+              @cancel="show = false"
+              @confirm="onUpload">
+            </sound-recording>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 底部消息发送栏 -->
+      <!-- 用来占位，防止聊天消息被发送框遮挡 -->
+      <div class="chat-bottom">
+		  
+		  <div class="content">
+		    <button class="record" @click="show = true">语音录制</button>
+		    <div class="popup-bottom" v-if="show">
+		      <div class="popup-bg" @click="show = false"></div>
+		      <div class="popup-content">
+		        <sound-recording
+		          :maximum="36000"
+		          :duration="100"
+		          @cancel="show = false"
+		          @confirm="onUpload">
+		        </sound-recording>
+		      </div>
+		    </div>
+		  </div>
+		  
+        <div class="send-msg">
+          <div class="uni-textarea">
+            <textarea v-model="inputValue"
+                      maxlength="300"
+                      :show-confirm-bar="false"
+                      auto-height
+                      placeholder="请输入古诗文的名字"></textarea>
+          </div>
+          <button @click="handleEnter" class="send-btn">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+
 <script>
-	
+import navBar from '@/components/navBar/navBar.vue'
 import { baseUrl } from '@/config.js';
 
 export default {
+  components: {
+    navBar
+  },
   data() {
     return {
       scrollTop: 0,
-      list: [
-        {
-          me: "",
-          id: 0,
-          robot: ""
-        }
-      ],
+      list: [],
       inputValue: "",
       show: false,
-      voicePath: ''
+      tempFilePath: "" // 添加 tempFilePath 变量
     };
   },
   computed: {
@@ -99,13 +113,25 @@ export default {
         });
         return;
       }
-      this.queryPoetry(inputValue)
-        .then(robot => {
-          this.list.push({ me: inputValue, robot: robot });
+      
+      // 立即显示输入的诗名
+      this.list.push({ me: inputValue, robot: "" });
+
+      // 在录音结束后上传录音并处理
+      this.uploadAudio(this.tempFilePath)
+        .then(() => {
+          // 无论上传成功或失败，都关闭弹窗
+          this.show = false;
+          return this.queryPoetry(inputValue);
+        })
+        .then(poetryData => {
+          // 将诗文数据添加到列表中
+          this.list.push({ me: "", robot: poetryData.text });
         })
         .catch(err => {
           console.log("请求失败：", err);
         });
+        
       this.inputValue = ""; // 清空输入框
     },
     queryPoetry(poetryName) {
@@ -127,36 +153,43 @@ export default {
         });
       });
     },
-   
     // 上传录音文件到服务器
-    onUpload(tempFilePath) {
-      uni.uploadFile({
-        url: baseUrl+'/audiotest',
-        filePath: tempFilePath,
-        name: 'file',
-        success: (uploadRes) => {
-          // 上传成功
-          const data = uploadRes.data;
-          // 在这里处理服务器返回的数据
-          console.log('上传成功，服务器数据：', data);
-        },
-        fail: (err) => {
-          // 上传失败
-          console.error('上传失败：', err);
-        }
+    uploadAudio(tempFilePath) {
+      return new Promise((resolve, reject) => {
+        uni.uploadFile({
+          url: baseUrl+'/audiotest',
+          filePath: tempFilePath,
+          name: 'file',
+          success: (uploadRes) => {
+            // 上传成功
+            const data = uploadRes.data;
+            // 在这里处理服务器返回的数据
+            console.log('上传成功，服务器数据：', data);
+            resolve();
+          },
+          fail: (err) => {
+            // 上传失败
+            console.error('上传失败：', err);
+            reject(err);
+          }
+        });
       });
+    },
+    onUpload(tempFilePath) {
+      // 在录音确认时更新 tempFilePath
+      this.tempFilePath = tempFilePath;
+      // 显示确认录音后的相关操作，例如发送按钮等
+	   this.show = false;
     }
   }
 };
 </script>
 
 
-
-
-
 <style lang="scss" scoped>
 $chatContentbgc: #C2DCFF;
 $sendBtnbgc: #4F7DF5;
+
 
 .chat {
   .scroll-view {
@@ -308,7 +341,16 @@ $sendBtnbgc: #4F7DF5;
     }
   }
   
-  
+  .record{
+	width: 50rpx;
+    height: 50rpx;
+    background-image: url('../../static/record.png');
+    color: #fff;
+    font-size: 32rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   
 }
 </style>
