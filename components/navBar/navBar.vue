@@ -65,7 +65,5 @@
 	 margin-top:60px;
  }
  
- .back-btn{
-	 background-image: url("@/static/backbtn.png");
- }
+
 </style>
