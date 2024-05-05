@@ -2,6 +2,16 @@
 <template>
   <div>
     <navBar titleName="背诵助手" />	
+	
+	<view class="custom-container">
+	     <div class="container-text">
+	       <p>哈喽~</p>
+	       <p>想要检查你的背诵成果吗？</p>
+	       <p>先输入你要背诵的古诗文的名字吧~</p>
+	       <p>正确的地方会用<span class="right">绿色</span>标出来哦~</p>
+	     </div>
+	   </view>
+	
     <div class="chat">
       <scroll-view :style="{height: `${windowHeight}rpx`}"
                    id="scrollview"
@@ -10,58 +20,54 @@
                    :scroll-with-animation="true"
                    class="scroll-view">
         <!-- 聊天主体 -->
+		
+		
         <div id="msglistview" class="chat-body">
           <!-- 聊天记录 -->
-          <div v-for="(item,index) in list" :key="index">
-            <!-- 自己发的消息 -->
-            <div class="item self" v-if="item.me !== ''">
-              <!-- 文字内容 -->
-              <div class="content right">{{ item.me }}</div>
-            </div>
-            <!-- 机器人发的消息 -->
-            <div class="item Ai" v-if="item.robot !== ''">
-              <!-- 文字内容 -->
-              <div class="content left" v-html="item.robot"></div>
-            </div>
+          
+            <div v-for="(item, index) in list" :key="index">
+              <div v-if="item.me !== ''" class="item self">
+                <div class="content right">{{ item.me }}</div>
+              </div>
+
+			
+              <div v-if="item.robot !== ''" class="item Ai">
+                <div class="content left" v-html="formatText(item.robot)"></div>
+              </div>
+          
+
           </div>
         </div>
       </scroll-view>
-      
-      <div class="content">
-        <button class="record" @click="show = true">语音录制</button>
-        <div class="popup-bottom" v-if="show">
-          <div class="popup-bg" @click="show = false"></div>
-          <div class="popup-content">
-            <sound-recording
-              :maximum="36000"
-              :duration="100"
-              @cancel="show = false"
-              @confirm="onUpload">
-            </sound-recording>
-          </div>
-        </div>
-      </div>
-      
+
+
+	
+	
+	
       <!-- 底部消息发送栏 -->
       <!-- 用来占位，防止聊天消息被发送框遮挡 -->
       <div class="chat-bottom">
-		  
-		  <div class="content">
-		    <button class="record" @click="show = true">语音录制</button>
-		    <div class="popup-bottom" v-if="show">
-		      <div class="popup-bg" @click="show = false"></div>
-		      <div class="popup-content">
-		        <sound-recording
-		          :maximum="36000"
-		          :duration="100"
-		          @cancel="show = false"
-		          @confirm="onUpload">
-		        </sound-recording>
-		      </div>
-		    </div>
-		  </div>
+	  
 		  
         <div class="send-msg">
+			
+			<!--左侧录音的按钮-->
+			<div class="content">
+			  <image class="record" @click="show = true"></image>
+			  <div class="popup-bottom" v-if="show">
+			    <div class="popup-bg" @click="show = false"></div>
+			    <div class="popup-content">
+			      <sound-recording
+			        :maximum="600"
+			        :duration="100"
+			        @cancel="show = false"
+			        @confirm="onUpload">
+			      </sound-recording>
+			    </div>
+			  </div>
+			</div>
+			
+			<!--右侧的输入框-->
           <div class="uni-textarea">
             <textarea v-model="inputValue"
                       maxlength="300"
@@ -79,6 +85,8 @@
 <script>
 import navBar from '@/components/navBar/navBar.vue'
 import { baseUrl } from '@/config.js';
+const innerAudioContext2 = uni.createInnerAudioContext();
+innerAudioContext2.autoplay = true;
 
 export default {
   components: {
@@ -88,18 +96,21 @@ export default {
     return {
       scrollTop: 0,
       list: [],
-      inputValue: "",
+      inputValue: "", // 用户输入的值
       show: false,
-      tempFilePath: "" // 添加 tempFilePath 变量
+      tempFilePath: "", // 存储临时文件路径
     };
   },
+ 
   computed: {
     windowHeight() {
+      // 获取窗口高度，用于设置滚动视图的高度
       return this.rpxTopx(uni.getSystemInfoSync().windowHeight);
     }
   },
   methods: {
     rpxTopx(px) {
+      // 将rpx单位转换为px单位
       let deviceWidth = wx.getSystemInfoSync().windowWidth;
       let rpx = (750 / deviceWidth) * Number(px);
       return Math.floor(rpx);
@@ -107,6 +118,7 @@ export default {
     handleEnter() {
       const inputValue = this.inputValue;
       if (!inputValue) {
+        // 如果用户输入为空，显示提示消息
         uni.showToast({
           title: "请输入古诗文名字",
           icon: "none"
@@ -114,27 +126,28 @@ export default {
         return;
       }
       
-      // 立即显示输入的诗名
-      this.list.push({ me: inputValue, robot: "" });
-
-      // 在录音结束后上传录音并处理
-      this.uploadAudio(this.tempFilePath)
-        .then(() => {
-          // 无论上传成功或失败，都关闭弹窗
-          this.show = false;
-          return this.queryPoetry(inputValue);
-        })
-        .then(poetryData => {
-          // 将诗文数据添加到列表中
-          this.list.push({ me: "", robot: poetryData.text });
-        })
-        .catch(err => {
-          console.log("请求失败：", err);
+      // 显示用户输入的古诗名
+     this.list.push({ 
+       me: inputValue,
+       robot: `您要背诵的古诗为《${inputValue}》。`
+     });
+      
+      // 如果用户输入的内容不为空，则查询古诗文
+      if (inputValue.trim() !== "") {
+        this.queryPoetry(inputValue).then(res => {
+          const content = res.data;
+		  console.log(content);
+          this.scrollTop = 9999999; // 滚动到底部
         });
-        
-      this.inputValue = ""; // 清空输入框
+      }
+	  
+	  // 清空输入框
+	  this.inputValue = "";
+	  
     },
+	
     queryPoetry(poetryName) {
+      // 查询古诗文
       return new Promise((resolve, reject) => {
         uni.request({
           url: baseUrl + "/poem",
@@ -143,53 +156,78 @@ export default {
             title: poetryName.trim()
           },
           success: res => {
-            console.log("请求成功：", res.data);
+            console.log("请求古诗成功：", res.data);
             resolve(res.data);
           },
           fail: err => {
-            console.log("请求失败：", err);
+            console.log("请求古诗失败：", err);
             reject(err);
           }
         });
       });
     },
-    // 上传录音文件到服务器
-    uploadAudio(tempFilePath) {
-      return new Promise((resolve, reject) => {
-        uni.uploadFile({
-          url: baseUrl+'/audiotest',
-          filePath: tempFilePath,
-          name: 'file',
-          success: (uploadRes) => {
-            // 上传成功
-            const data = uploadRes.data;
-            // 在这里处理服务器返回的数据
-            console.log('上传成功，服务器数据：', data);
-            resolve();
-          },
-          fail: (err) => {
-            // 上传失败
-            console.error('上传失败：', err);
-            reject(err);
-          }
-        });
-      });
-    },
-    onUpload(tempFilePath) {
-      // 在录音确认时更新 tempFilePath
-      this.tempFilePath = tempFilePath;
-      // 显示确认录音后的相关操作，例如发送按钮等
-	   this.show = false;
+	
+   onUpload(tempFilePath) {
+     uni.uploadFile({
+       url: baseUrl+"/audio",
+       filePath: tempFilePath,
+       name: 'file',
+       success: (uploadRes) => {
+         // 上传成功
+         const data = uploadRes.data;
+         // 在这里处理服务器返回的数据
+         console.log('上传成功，服务器de数据是：', data);
+		 this.list.push({
+			 me:"背诵完成",
+			 robot:data
+		 })
+		 this.show = false;
+       },
+       fail: (err) => {
+         // 上传失败
+         console.error('上传失败：', err);
+       }
+     });
+   },
+    formatText(text) {
+     return text.replace(/\(([^)]+)\)/g, '<span style="color:green">$1</span>');
     }
-  }
+
+	}
+   
 };
 </script>
+
 
 
 <style lang="scss" scoped>
 $chatContentbgc: #C2DCFF;
 $sendBtnbgc: #4F7DF5;
+.hello{
+  width:20px;
+} 
 
+.custom-container {
+  margin-top: 20px;
+  padding: 10px;
+  height:90px;
+  border: 1px solid #007bff; /* 蓝色边框 */
+  border-radius: 10px; /* 圆角 */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+  background: linear-gradient(to bottom, #007bff, #ffffff); /* 渐变背景色 */
+  margin-left:25px;
+  width:80%;
+}
+.container-text {
+  color: #000000; /* 文字颜色 */
+  font-size: 16px; /* 文字大小 */
+  text-align:left; 
+  font-weight: bold;
+} 
+.right{
+  color:green;
+  font-size: 20px;
+}
 
 .chat {
   .scroll-view {
@@ -269,7 +307,7 @@ $sendBtnbgc: #4F7DF5;
     .send-msg {
       display: flex;
       align-items: flex-end;
-      padding: 16rpx 30rpx;
+      padding-left:80px;
       width: 100%;
       min-height: 177rpx;
       position: fixed;
@@ -279,9 +317,10 @@ $sendBtnbgc: #4F7DF5;
 
     .uni-textarea {
       padding-bottom: 70rpx;
-
+	  
       textarea {
-        width: 537rpx;
+		
+        width: 360rpx;
         min-height: 75rpx;
         max-height: 500rpx;
         background: #FFFFFF;
@@ -313,7 +352,7 @@ $sendBtnbgc: #4F7DF5;
   }
   
   .content {
-    padding: 30rpx;
+    padding-: 30rpx;
   }
   .popup-bottom {
     position: fixed;
@@ -342,14 +381,16 @@ $sendBtnbgc: #4F7DF5;
   }
   
   .record{
-	width: 50rpx;
-    height: 50rpx;
-    background-image: url('../../static/record.png');
-    color: #fff;
-    font-size: 32rpx;
+	width: 80rpx;
+    height: 80rpx;
+    background-image: url('./record.png');
     display: flex;
     justify-content: center;
-    align-items: center;
+	background-size: cover; /* 设置背景图片大小 */
+	 margin-bottom: 35px;
+	 margin-left:-60px;
+	 border-radius: 100%;
+	 
   }
   
 }
