@@ -1,31 +1,18 @@
 <template>
-	<view
-		class="u-circle-progress"
-		:style="{
-			width: widthPx + 'px',
-			height: widthPx + 'px',
-			backgroundColor: bgColor
-		}"
-	>
+	<view class="u-circle-progress" :style="{
+		width: widthPx + 'px',
+		height: widthPx + 'px',
+		backgroundColor: bgColor
+	}">
 		<!-- 支付宝小程序不支持canvas-id属性，必须用id属性 -->
-		<canvas
-			class="u-canvas-bg"
-			:canvas-id="elBgId"
-			:id="elBgId"
-			:style="{
-				width: widthPx + 'px',
-				height: widthPx + 'px'
-			}"
-		></canvas>
-		<canvas
-			class="u-canvas"
-			:canvas-id="elId"
-			:id="elId"
-			:style="{
-				width: widthPx + 'px',
-				height: widthPx + 'px'
-			}"
-		></canvas>
+		<canvas class="u-canvas-bg" :canvas-id="elBgId" :id="elBgId" :style="{
+		width: widthPx + 'px',
+		height: widthPx + 'px'
+	}"></canvas>
+		<canvas class="u-canvas" :canvas-id="elId" :id="elId" :style="{
+		width: widthPx + 'px',
+		height: widthPx + 'px'
+	}"></canvas>
 		<slot></slot>
 	</view>
 </template>
@@ -45,6 +32,9 @@
  * @property {String} bg-color 整个组件背景颜色，默认为白色
  * @example <u-circle-progress active-color="#2979ff" :percent="80"></u-circle-progress>
  */
+
+import { baseUrl } from '@/config.js';
+
 export default {
 	name: 'u-circle-progress',
 	props: {
@@ -187,9 +177,41 @@ export default {
 				// 定时器，每次操作间隔为time值，为了让进度条有动画效果
 				this.drawCircleByProgress(progress);
 			}, time);
+		},
+		getScore(username) {
+			uni.request({
+				url: baseUrl + '/score/get',
+				method: 'POST',
+				data: { username },
+				header: {
+					'content-type': 'application/json'
+				},
+				success: (res) => {
+					console.log(res.data);
+				},
+				fail: (err) => {
+					console.error(err);
+				}
+			});
+		},
+		submitScore(formData) {
+			uni.request({
+				url: baseUrl + '/score/submit',
+				method: 'POST',
+				data: formData,
+				header: {
+					'content-type': 'application/json'
+				},
+				success: (res) => {
+					console.log(res.data);
+				},
+				fail: (err) => {
+					console.error(err);
+				}
+			});
 		}
 	}
-};
+}
 </script>
 
 <style lang="scss" scoped>
@@ -197,7 +219,7 @@ export default {
 .u-circle-progress {
 	position: relative;
 	/* #ifndef APP-NVUE */
-	display: inline-flex;		
+	display: inline-flex;
 	/* #endif */
 	align-items: center;
 	justify-content: center;

@@ -1,79 +1,67 @@
-
 <template>
   <div>
-    <navBar titleName="背诵助手" />	
-	
-	<view class="custom-container">
-	     <div class="container-text">
-	       <p>哈喽~</p>
-	       <p>想要检查你的背诵成果吗？</p>
-	       <p>先输入你要背诵的古诗文的名字吧~</p>
-	       <p>正确的地方会用<span class="right">绿色</span>标出来哦~</p>
-	     </div>
-	   </view>
-	
+    <navBar titleName="背诵助手" />
+
+    <view class="custom-container">
+      <div class="container-text">
+        <p>哈喽~</p>
+        <p>想要检查你的背诵成果吗？</p>
+        <p>先输入你要背诵的古诗文的名字吧~</p>
+        <p>正确的地方会用<span class="right">绿色</span>标出来哦~</p>
+      </div>
+    </view>
+
     <div class="chat">
-      <scroll-view :style="{height: `${windowHeight}rpx`}"
-                   id="scrollview"
-                   scroll-y="true"
-                   :scroll-top="scrollTop"
-                   :scroll-with-animation="true"
-                   class="scroll-view">
+      <scroll-view :style="{ height: `${windowHeight}rpx` }" id="scrollview" scroll-y="true" :scroll-top="scrollTop"
+        :scroll-with-animation="true" class="scroll-view">
         <!-- 聊天主体 -->
-		
-		
+
+
         <div id="msglistview" class="chat-body">
           <!-- 聊天记录 -->
-          
-            <div v-for="(item, index) in list" :key="index">
-              <div v-if="item.me !== ''" class="item self">
-                <div class="content right">{{ item.me }}</div>
-              </div>
 
-			
-              <div v-if="item.robot !== ''" class="item Ai">
-                <div class="content left" v-html="formatText(item.robot)"></div>
-              </div>
-          
+          <div v-for="(item, index) in list" :key="index">
+            <div v-if="item.me !== ''" class="item self">
+              <div class="content right">{{ item.me }}</div>
+            </div>
+
+
+            <div v-if="item.robot !== ''" class="item Ai">
+              <div class="content left" v-html="formatText(item.robot)"></div>
+            </div>
+
 
           </div>
         </div>
       </scroll-view>
 
 
-	
-	
-	
+
+
+
       <!-- 底部消息发送栏 -->
       <!-- 用来占位，防止聊天消息被发送框遮挡 -->
       <div class="chat-bottom">
-	  
-		  
+
+
         <div class="send-msg">
-			
-			<!--左侧录音的按钮-->
-			<div class="content">
-			  <image class="record" @click="show = true"></image>
-			  <div class="popup-bottom" v-if="show">
-			    <div class="popup-bg" @click="show = false"></div>
-			    <div class="popup-content">
-			      <sound-recording
-			        :maximum="600"
-			        :duration="100"
-			        @cancel="show = false"
-			        @confirm="onUpload">
-			      </sound-recording>
-			    </div>
-			  </div>
-			</div>
-			
-			<!--右侧的输入框-->
+
+          <!--左侧录音的按钮-->
+          <div class="content">
+            <image class="record" @click="show = true"></image>
+            <div class="popup-bottom" v-if="show">
+              <div class="popup-bg" @click="show = false"></div>
+              <div class="popup-content">
+                <sound-recording :maximum="600" :duration="100" @cancel="show = false" @confirm="onUpload">
+                </sound-recording>
+              </div>
+            </div>
+          </div>
+
+          <!--右侧的输入框-->
           <div class="uni-textarea">
-            <textarea v-model="inputValue"
-                      maxlength="300"
-                      :show-confirm-bar="false"
-                      auto-height
-                      placeholder="请输入古诗文的名字"></textarea>
+            <textarea v-model="inputValue" maxlength="300" :show-confirm-bar="false" auto-height
+              placeholder="请输入古诗文的名字"></textarea>
           </div>
           <button @click="handleEnter" class="send-btn">发送</button>
         </div>
@@ -101,7 +89,7 @@ export default {
       tempFilePath: "", // 存储临时文件路径
     };
   },
- 
+
   computed: {
     windowHeight() {
       // 获取窗口高度，用于设置滚动视图的高度
@@ -125,27 +113,27 @@ export default {
         });
         return;
       }
-      
+
       // 显示用户输入的古诗名
-     this.list.push({ 
-       me: inputValue,
-       robot: `您要背诵的古诗为《${inputValue}》。`
-     });
-      
+      this.list.push({
+        me: inputValue,
+        robot: `您要背诵的古诗为《${inputValue}》。`
+      });
+
       // 如果用户输入的内容不为空，则查询古诗文
       if (inputValue.trim() !== "") {
         this.queryPoetry(inputValue).then(res => {
           const content = res.data;
-		  console.log(content);
+          console.log(content);
           this.scrollTop = 9999999; // 滚动到底部
         });
       }
-	  
-	  // 清空输入框
-	  this.inputValue = "";
-	  
+
+      // 清空输入框
+      this.inputValue = "";
+
     },
-	
+
     queryPoetry(poetryName) {
       // 查询古诗文
       return new Promise((resolve, reject) => {
@@ -166,35 +154,35 @@ export default {
         });
       });
     },
-	
-   onUpload(tempFilePath) {
-     uni.uploadFile({
-       url: baseUrl+"/audio",
-       filePath: tempFilePath,
-       name: 'file',
-       success: (uploadRes) => {
-         // 上传成功
-         const data = uploadRes.data;
-         // 在这里处理服务器返回的数据
-         console.log('上传成功，服务器de数据是：', data);
-		 this.list.push({
-			 me:"背诵完成",
-			 robot:data
-		 })
-		 this.show = false;
-       },
-       fail: (err) => {
-         // 上传失败
-         console.error('上传失败：', err);
-       }
-     });
-   },
+
+    onUpload(tempFilePath) {
+      uni.uploadFile({
+        url: baseUrl + "/audio",
+        filePath: tempFilePath,
+        name: 'file',
+        success: (uploadRes) => {
+          // 上传成功
+          const data = uploadRes.data;
+          // 在这里处理服务器返回的数据
+          console.log('上传成功，服务器de数据是：', data);
+          this.list.push({
+            me: "背诵完成",
+            robot: data
+          })
+          this.show = false;
+        },
+        fail: (err) => {
+          // 上传失败
+          console.error('上传失败：', err);
+        }
+      });
+    },
     formatText(text) {
-     return text.replace(/\(([^)]+)\)/g, '<span style="color:green">$1</span>');
+      return text.replace(/\(([^)]+)\)/g, '<span style="color:green">$1</span>');
     }
 
-	}
-   
+  }
+
 };
 </script>
 
@@ -203,29 +191,38 @@ export default {
 <style lang="scss" scoped>
 $chatContentbgc: #C2DCFF;
 $sendBtnbgc: #4F7DF5;
-.hello{
-  width:20px;
-} 
+
+.hello {
+  width: 20px;
+}
 
 .custom-container {
   margin-top: 20px;
   padding: 10px;
-  height:90px;
-  border: 1px solid #007bff; /* 蓝色边框 */
-  border-radius: 10px; /* 圆角 */
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-  background: linear-gradient(to bottom, #007bff, #ffffff); /* 渐变背景色 */
-  margin-left:25px;
-  width:80%;
+  height: 90px;
+  border: 1px solid #007bff;
+  /* 蓝色边框 */
+  border-radius: 10px;
+  /* 圆角 */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(0, 0, 0, 0.1);
+  /* 阴影效果 */
+  background: linear-gradient(to bottom, #007bff, #ffffff);
+  /* 渐变背景色 */
+  margin-left: 25px;
+  width: 80%;
 }
+
 .container-text {
-  color: #000000; /* 文字颜色 */
-  font-size: 16px; /* 文字大小 */
-  text-align:left; 
+  color: #000000;
+  /* 文字颜色 */
+  font-size: 16px;
+  /* 文字大小 */
+  text-align: left;
   font-weight: bold;
-} 
-.right{
-  color:green;
+}
+
+.right {
+  color: green;
   font-size: 20px;
 }
 
@@ -239,6 +236,7 @@ $sendBtnbgc: #4F7DF5;
       background: transparent;
       color: transparent;
     }
+
     background-color: #F6F6F6;
 
     .chat-body {
@@ -249,6 +247,7 @@ $sendBtnbgc: #4F7DF5;
       .self {
         justify-content: flex-end;
       }
+
       .item {
         display: flex;
         padding: 23rpx 30rpx;
@@ -256,9 +255,11 @@ $sendBtnbgc: #4F7DF5;
         .right {
           background-color: $chatContentbgc;
         }
+
         .left {
           background-color: #FFFFFF;
         }
+
         .right::after {
           position: absolute;
           display: inline-block;
@@ -270,6 +271,7 @@ $sendBtnbgc: #4F7DF5;
           border: 12rpx solid transparent;
           border-left: 12rpx solid $chatContentbgc;
         }
+
         .left::after {
           position: absolute;
           display: inline-block;
@@ -281,6 +283,7 @@ $sendBtnbgc: #4F7DF5;
           border: 12rpx solid transparent;
           border-right: 12rpx solid #FFFFFF;
         }
+
         .content {
           position: relative;
           max-width: 486rpx;
@@ -307,7 +310,7 @@ $sendBtnbgc: #4F7DF5;
     .send-msg {
       display: flex;
       align-items: flex-end;
-      padding-left:80px;
+      padding-left: 80px;
       width: 100%;
       min-height: 177rpx;
       position: fixed;
@@ -317,9 +320,9 @@ $sendBtnbgc: #4F7DF5;
 
     .uni-textarea {
       padding-bottom: 70rpx;
-	  
+
       textarea {
-		
+
         width: 360rpx;
         min-height: 75rpx;
         max-height: 500rpx;
@@ -350,10 +353,11 @@ $sendBtnbgc: #4F7DF5;
       line-height: 28rpx;
     }
   }
-  
+
   .content {
     padding-: 30rpx;
   }
+
   .popup-bottom {
     position: fixed;
     bottom: 0;
@@ -363,14 +367,16 @@ $sendBtnbgc: #4F7DF5;
     z-index: 10;
     display: flex;
     flex-direction: column;
+
     .popup-bg {
       position: fixed;
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
     }
+
     .popup-content {
       height: 40%;
       margin-top: auto;
@@ -379,19 +385,20 @@ $sendBtnbgc: #4F7DF5;
       z-index: 11;
     }
   }
-  
-  .record{
-	width: 80rpx;
+
+  .record {
+    width: 80rpx;
     height: 80rpx;
     background-image: url('./record.png');
     display: flex;
     justify-content: center;
-	background-size: cover; /* 设置背景图片大小 */
-	 margin-bottom: 35px;
-	 margin-left:-60px;
-	 border-radius: 100%;
-	 
+    background-size: cover;
+    /* 设置背景图片大小 */
+    margin-bottom: 35px;
+    margin-left: -60px;
+    border-radius: 100%;
+
   }
-  
+
 }
 </style>
