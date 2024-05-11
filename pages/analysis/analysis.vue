@@ -73,6 +73,8 @@
 </template>
 
 <script>
+import { baseUrl } from '@/config.js';	
+	
 export default {
   data() {
     return {
@@ -89,80 +91,61 @@ export default {
       subject: "",
       score: "",
       examDate: "",
-      suggestions: [] // 建议数组
+      suggestions: [], // 建议数组
+	  username:"李明"
     };
   },
-  mounted() {
+  mounted() { //钩子函数 页面加载时自动执行
     // 发送请求获取数据
-    uni.request({
-      url: '你的网页地址',
-      success: (res) => {
-        // 更新数据
-        this.chartData.categories = res.data.categories;
-        this.chartData.series = res.data.series;
-        // 更新雷达图数据
-        const averages = res.data.series.map(subject => {
-          const average = subject.data.reduce((acc, val) => acc + val, 0) / subject.data.length;
-          return average;
-        });
-        this.radarChartData.series[0].data = averages; // 更新雷达图数据
-
-        // 更新建议
-        this.suggestions = res.data.suggestions;
-
-        // 加载完成，隐藏加载提示
-        this.loading = false;
-      },
-      fail: (err) => {
-        console.error('请求失败：', err);
-        // 加载失败，隐藏加载提示
-        this.loading = false;
-      }
-    });
+	uni.request({
+		url:baseUrl+"/score/get",
+		method:"GET",
+		success:(res)=>{
+			console.log(res.data);
+			}
+		
+	});
+	
+   
   },
   methods: {
-    handleSubmit() {
-      // 获取表单数据
-      const subject = this.subject;
-      const score = this.score;
-      const examDate = this.examDate;
+   handleSubmit() {
+     // 获取表单数据
+     const subject = this.subject;
+     const score = this.score;
+     const examDate = this.examDate;
+   
+     // 构造表单数据对象
+     const formData = {
+       username: this.username, // 假设用户固定为 "user1"
+       subject,
+       score,
+       time: examDate // 假设 examDate 就是时间
+     };
+		uni.request({
+			url: baseUrl + '/score/add',
+			method: 'POST',
+			data: formData,
+			header: {
+				'content-type': 'application/json'
+			},
+			success: (res) => {
+				console.log(res.data);
+			},
+			fail: (err) => {
+				console.error(err);
+			}
+	})
+     
+   },
 
-      // 把表单数据发送到网页
-      uni.request({
-        url: '你的网页地址',
-        data: {
-          subject,
-          score,
-          examDate
-        },
-        success: (res) => {
-          this.chartData.categories = res.data.categories;
-          this.chartData.series = res.data.series;
-          // 更新雷达图数据
-          const averages = res.data.series.map(subject => {
-            const average = subject.data.reduce((acc, val) => acc + val, 0) / subject.data.length;
-            return average;
-          });
-          this.radarChartData.series[0].data = averages; // 更新雷达图数据
-
-          // 更新建议
-          this.suggestions = res.data.suggestions;
-
-          // 加载完成，隐藏加载提示
-          this.loading = false;
-        },
-        fail: (err) => {
-          console.error('请求失败：', err);
-          // 加载失败，隐藏加载提示
-          this.loading = false;
-        }
-      });
-    },
     handleReset() {
       this.subject = '';
       this.score = '';
       this.examDate = '';
-    }
+    },
+	
+	
   }
 };
 </script>

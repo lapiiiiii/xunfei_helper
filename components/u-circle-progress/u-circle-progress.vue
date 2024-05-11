@@ -177,39 +177,8 @@ export default {
 				// 定时器，每次操作间隔为time值，为了让进度条有动画效果
 				this.drawCircleByProgress(progress);
 			}, time);
-		},
-		getScore(username) {
-			uni.request({
-				url: baseUrl + '/score/get',
-				method: 'POST',
-				data: { username },
-				header: {
-					'content-type': 'application/json'
-				},
-				success: (res) => {
-					console.log(res.data);
-				},
-				fail: (err) => {
-					console.error(err);
-				}
-			});
-		},
-		submitScore(formData) {
-			uni.request({
-				url: baseUrl + '/score/submit',
-				method: 'POST',
-				data: formData,
-				header: {
-					'content-type': 'application/json'
-				},
-				success: (res) => {
-					console.log(res.data);
-				},
-				fail: (err) => {
-					console.error(err);
-				}
-			});
 		}
+		
 	}
 }
 </script>
