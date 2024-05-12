@@ -92,6 +92,7 @@ export default {
       score: "",
       examDate: "",
       suggestions: [], // 建议数组
+	  username:"lihua"
     };
   },
   mounted() { //钩子函数 页面加载时自动执行
@@ -101,23 +102,24 @@ export default {
    
   },
   methods: {
-	  getData() {
-	      uni.request({
-	          url: baseUrl + "/score/get",
-	          method: "POST",
-	          data: {
-	              username: "lihua" // 这里是固定的用户名
-	          },
-	          success: (res) => {
-	              console.log(res);
-	              // 在这里处理获取到的数据，例如更新组件的数据
-	          },
-	          fail: (err) => {
-	              console.error('请求数据失败', err);
-	              // 处理请求失败的情况
-	          }
-	      });
-	  },
+	 getData() {
+	     uni.request({
+	         url: baseUrl + "/score/get",
+	         method: "POST",
+	         data: {
+	             username: this.username // 将用户名作为请求体发送
+	         },
+	         success: (res) => {
+	             console.log(res);
+	             // 在这里处理获取到的数据，例如更新组件的数据
+	         },
+	         fail: (err) => {
+	             console.error('请求数据失败', err);
+	             // 处理请求失败的情况
+	         }
+	     });
+	 },
+
 
 	  handleSubmit() {
 	    // 获取表单数据
