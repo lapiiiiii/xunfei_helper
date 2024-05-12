@@ -45,7 +45,7 @@
             <option value="生物">生物</option>
           </select>
         </div>
-
+   
         <div style="margin-bottom: 10px; display: flex; align-items: center;">
           <label class="score" style="margin-right: 10px;">填写成绩:</label>
           <input type="number" id="score" v-model="score" placeholder="成绩" style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
@@ -102,46 +102,57 @@ export default {
    
   },
   methods: {
-	 getData() {
-	     uni.request({
-	         url: baseUrl + "/score/get",
-	         method: "POST",
-	         data: {
-	             username: this.username // 将用户名作为请求体发送
-	         },
-	         success: (res) => {
-	             console.log(res);
-	             // 在这里处理获取到的数据，例如更新组件的数据
-	         },
-	         fail: (err) => {
-	             console.error('请求数据失败', err);
-	             // 处理请求失败的情况
-	         }
-	     });
-	 },
+	getData() {
+	        uni.request({
+	            url: baseUrl + "/score/get",
+	            method: "GET",
+	            data: {
+	                username: this.username // Assuming you're sending the username as a parameter
+	            },
+	            success: (res) => {
+	                console.log(res);
+	                // Assuming res.data contains the necessary data for both charts
+	
+	                // For Line Chart
+	                this.chartData.categories = res.data.lineChartCategories; // Assuming you have an array of categories for the x-axis
+	                this.chartData.series = res.data.lineChartSeries; // Assuming you have an array of series data for the y-axis
+	
+	                // For Radar Chart
+	                this.radarChartData.categories = res.data.radarChartCategories; // Assuming you have an array of categories for the radar chart
+	                this.radarChartData.series = res.data.radarChartSeries; // Assuming you have an array of series data for the radar chart
+	
+	                // Now, data is assigned, you can set loading to false to hide the loading message
+	                this.loading = false;
+	            },
+	            fail: (err) => {
+	                console.error('请求数据失败', err);
+	                // Handle request failure
+	            }
+	        });
+	    },
 
 
 	  handleSubmit() {
 	    // 获取表单数据
-	    const subject = this.subject;
-	    const score = this.score;
+		console.log("字符串是"+this.subject);
 	   
 		const examDate = new Date(this.examDate);
 		const isoDateString = examDate.toISOString();
 		const formattedDateString = isoDateString.slice(0, 23) + "+00:00";
-		console.log("时间为 " + formattedDateString);
+	
 
 	    // 构造表单数据对象
 	    const formData = {
 	      username: "lihua", // 假设用户固定为 "user1"
-	      subject:score.toString(),
-	      score,
+	      subject:this.subject,
+	      score:this.score,
 	      time: formattedDateString // 假设 examDate 就是时间
 	    };
-	  
+	    
 	    // 将表单数据对象转换为 JSON 字符串
 	    const formDataString = JSON.stringify(formData);
-	    
+	    console.log(formDataString);
+		/*
 	    uni.request({
 	      url: baseUrl + '/score/add',
 	      method: 'POST',
@@ -158,7 +169,7 @@ export default {
 	      },
 		   
 	    });
-		
+		*/
 	  }
 
  
