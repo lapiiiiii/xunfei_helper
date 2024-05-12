@@ -92,61 +92,75 @@ export default {
       score: "",
       examDate: "",
       suggestions: [], // 建议数组
-	  username:"李明"
     };
   },
   mounted() { //钩子函数 页面加载时自动执行
     // 发送请求获取数据
-	uni.request({
-		url:baseUrl+"/score/get",
-		method:"GET",
-		success:(res)=>{
-			console.log(res.data);
-			}
-		
-	});
 	
+	this.getData();
    
   },
   methods: {
-   handleSubmit() {
-     // 获取表单数据
-     const subject = this.subject;
-     const score = this.score;
-     const examDate = this.examDate;
-   
-     // 构造表单数据对象
-     const formData = {
-       username: this.username, // 假设用户固定为 "user1"
-       subject,
-       score,
-       time: examDate // 假设 examDate 就是时间
-     };
-		uni.request({
-			url: baseUrl + '/score/add',
-			method: 'POST',
-			data: formData,
-			header: {
-				'content-type': 'application/json'
-			},
-			success: (res) => {
-				console.log(res.data);
-			},
-			fail: (err) => {
-				console.error(err);
-			}
-	})
-     
-   },
+	  getData() {
+	      uni.request({
+	          url: baseUrl + "/score/get",
+	          method: "POST",
+	          data: {
+	              username: "lihua" // 这里是固定的用户名
+	          },
+	          success: (res) => {
+	              console.log(res);
+	              // 在这里处理获取到的数据，例如更新组件的数据
+	          },
+	          fail: (err) => {
+	              console.error('请求数据失败', err);
+	              // 处理请求失败的情况
+	          }
+	      });
+	  },
 
-    handleReset() {
-      this.subject = '';
-      this.score = '';
-      this.examDate = '';
-    },
-	
-	
-  }
+	  handleSubmit() {
+	    // 获取表单数据
+	    const subject = this.subject;
+	    const score = this.score;
+	   
+		const examDate = new Date(this.examDate);
+		const isoDateString = examDate.toISOString();
+		const formattedDateString = isoDateString.slice(0, 23) + "+00:00";
+		console.log("时间为 " + formattedDateString);
+
+	    // 构造表单数据对象
+	    const formData = {
+	      username: "lihua", // 假设用户固定为 "user1"
+	      subject:score.toString(),
+	      score,
+	      time: formattedDateString // 假设 examDate 就是时间
+	    };
+	  
+	    // 将表单数据对象转换为 JSON 字符串
+	    const formDataString = JSON.stringify(formData);
+	    
+	    uni.request({
+	      url: baseUrl + '/score/add',
+	      method: 'POST',
+	      data: formDataString, // 传输 JSON 字符串
+	      header: {
+	        'content-type': 'application/json'
+	      },
+	      success: (res) => {
+	        console.log('添加成绩成功', res);
+			this.getData();
+			},
+	      fail: (err) => {
+	        console.error('添加成绩失败', err);
+	      },
+		   
+	    });
+		
+	  }
+
+ 
+}
 };
 </script>
 
