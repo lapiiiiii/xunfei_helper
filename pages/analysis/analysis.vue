@@ -34,17 +34,15 @@
       <img src="https://i.postimg.cc/44bTPxrv/image.png" alt="Popup Image" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px 10px 0 0;">
 
       <form @submit="handleSubmit">
-        <div style="margin-bottom: 10px;">
-          <label class="subject" style="margin-right: 20px;">选择学科</label>
-          <select id="subject" style="width: 60px;height:40px;" v-model="subject">
-            <option value="语文">语文</option>
-            <option value="数学">数学</option>
-            <option value="英语">英语</option>
-            <option value="物理">物理</option>
-            <option value="化学">化学</option>
-            <option value="生物">生物</option>
-          </select>
-        </div>
+       
+
+          <label class="subject">选择学科</label>
+ 
+		<div style="margin-bottom: 10px; display: flex; align-items: center;">
+		  <label class="score" style="margin-right: 10px;">填写学科:</label>
+		  <input type="text" id="subject" v-model="subject"  style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
+		</div>
+       
    
         <div style="margin-bottom: 10px; display: flex; align-items: center;">
           <label class="score" style="margin-right: 10px;">填写成绩:</label>
@@ -74,108 +72,180 @@
 
 <script>
 import { baseUrl } from '@/config.js';	
-	
 export default {
   data() {
     return {
       chartData: {
-        categories: [],
-        series: []
+        categories: ["2024-4-20","2024-5-02"],
+        series: [
+          {
+            name: "语文", // 学科名称
+            data: [124,126] // 该学科在不同时间点上的成绩数据
+          },
+          {
+            name:"数学",
+            data:[56,78]
+          },
+		  {
+		    name: "英语", // 学科名称
+		    data: [129,132] // 该学科在不同时间点上的成绩数据
+		  },
+		  {
+		    name:"物理",
+		    data:[78,64]
+		  },
+		  {
+		    name: "生物", // 学科名称
+		    data: [94,88] // 该学科在不同时间点上的成绩数据
+		  },
+		  {
+		    name:"化学",
+		    data:[64,69]
+		  },
+		 
+        ]
       },
       radarChartData: {
         categories: ["语文", "数学", "英语", "物理", "化学", "生物"],
-        series: [{ name: "成绩", data: [] }]
+        series: [
+          { 
+            name: "平均成绩", 
+            data: [125,64,130.5,72,90,66] ,
+          }
+        ],
       },
       loading: true, // 控制加载提示的显示
       showPopup: false,
-      subject: "",
+      subject: "数学",
       score: "",
       examDate: "",
       suggestions: [], // 建议数组
-	  username:"lihua"
+      username: "lihua",
     };
   },
   mounted() { //钩子函数 页面加载时自动执行
     // 发送请求获取数据
-	
-	this.getData();
-   
+    this.getData();
   },
   methods: {
-	getData() {
-	        uni.request({
-	            url: baseUrl + "/score/get",
-	            method: "GET",
-	            data: {
-	                username: this.username // Assuming you're sending the username as a parameter
-	            },
-	            success: (res) => {
-	                console.log(res);
-	                // Assuming res.data contains the necessary data for both charts
-	
-	                // For Line Chart
-	                this.chartData.categories = res.data.lineChartCategories; // Assuming you have an array of categories for the x-axis
-	                this.chartData.series = res.data.lineChartSeries; // Assuming you have an array of series data for the y-axis
-	
-	                // For Radar Chart
-	                this.radarChartData.categories = res.data.radarChartCategories; // Assuming you have an array of categories for the radar chart
-	                this.radarChartData.series = res.data.radarChartSeries; // Assuming you have an array of series data for the radar chart
-	
-	                // Now, data is assigned, you can set loading to false to hide the loading message
-	                this.loading = false;
-	            },
-	            fail: (err) => {
-	                console.error('请求数据失败', err);
-	                // Handle request failure
-	            }
-	        });
-	    },
-
-
-	  handleSubmit() {
-	    // 获取表单数据
-		console.log("字符串是"+this.subject);
-	   
-		const examDate = new Date(this.examDate);
-		const isoDateString = examDate.toISOString();
-		const formattedDateString = isoDateString.slice(0, 23) + "+00:00";
-	
-
-	    // 构造表单数据对象
-	    const formData = {
-	      username: "lihua", // 假设用户固定为 "user1"
-	      subject:this.subject,
-	      score:this.score,
-	      time: formattedDateString // 假设 examDate 就是时间
-	    };
-	    
-	    // 将表单数据对象转换为 JSON 字符串
-	    const formDataString = JSON.stringify(formData);
-	    console.log(formDataString);
-		/*
-	    uni.request({
-	      url: baseUrl + '/score/add',
-	      method: 'POST',
-	      data: formDataString, // 传输 JSON 字符串
-	      header: {
-	        'content-type': 'application/json'
-	      },
-	      success: (res) => {
-	        console.log('添加成绩成功', res);
-			this.getData();
-			},
-	      fail: (err) => {
-	        console.error('添加成绩失败', err);
-	      },
-		   
-	    });
-		*/
-	  }
-
- 
-}
+    getData() {
+      uni.request({
+        url: baseUrl + "/score/get",
+        method: "GET",
+        data: {
+          username: this.username // Assuming you're sending the username as a parameter
+        },
+        success: (res) => {
+          console.log(res); // 查看 res 的内容
+          // 提取时间、成绩和学科
+          const time = new Date(res.time).toISOString().slice(0, 10); // 仅保留日期部分
+		  console.log("时间是:"+time);
+          const score = parseInt(res.score);
+          const subject = res.subject;
+        
+          // 检查折线图数据中是否已存在相应学科的系列
+          const existingSeriesIndex = this.chartData.series.findIndex(series => series.name === subject);
+        
+          if (existingSeriesIndex !== -1) {
+            // 如果已存在，则将成绩添加到该学科的系列中
+            const existingSeries = this.chartData.series[existingSeriesIndex];
+            const timeIndex = this.chartData.categories.indexOf(time);
+            if (timeIndex !== -1) {
+              existingSeries.data[timeIndex] = score;
+            } else {
+              // 如果时间在 categories 中不存在，则将时间和成绩同时添加到对应位置
+              this.chartData.categories.push(time);
+              existingSeries.data.push(score);
+            }
+          } else {
+            // 如果不存在，则创建一个新的系列并添加到折线图数据中
+            this.chartData.series.push({
+              name: subject,
+              data: [score]
+            });
+            // 同时更新横轴数据
+            this.chartData.categories.push(time);
+          }
+        
+          // 计算各学科的平均成绩并更新到雷达图数据中
+          const averageScores = {};
+          this.chartData.series.forEach((series) => {
+            const subject = series.name;
+            const scores = series.data;
+            const average = scores.reduce((acc, cur) => acc + cur, 0) / scores.length;
+            averageScores[subject] = average;
+          });
+          
+          // 更新雷达图数据
+          this.radarChartData.series[0].data = Object.values(averageScores);
+    
+          // 更新页面
+          this.loading = false;
+        },
+        fail: (err) => {
+          console.error('请求数据失败', err);
+          // Handle request failure
+        }
+      });
+    },
+  
+    handleReset() {
+      this.subject = "";
+      this.score = "";
+      this.examDate = "";
+    },
+    handleSubmit() {
+      const subject = this.subject;
+      const score = this.score;
+      const examDate = new Date(this.examDate);
+      const isoDatestring = examDate.toISOString(); // 修改此行
+      const formattedDatestring = isoDatestring.slice(0,23)+ "+00:00";
+      const formData = {
+        username: this.username,
+        subject: subject,
+        score: score,
+        time: formattedDatestring
+      };
+  
+      const formDataString = JSON.stringify(formData);
+      uni.request({
+        url: baseUrl + '/score/add',
+        method: 'POST',
+        data: formDataString, // 直接传输表单数据对象
+        header: {
+          'content-type': 'application/json'
+        },
+        success: (res) => {
+          console.log('添加成绩成功', res);
+          // 将新数据添加到折线统计图的数据中
+		 const seriesIndex = this.chartData.series.findIndex(series => series.name === formData.subject);
+		       if (seriesIndex !== -1) {
+		         const formattedDate = examDate.toISOString().slice(0, 10);
+		         this.chartData.categories.push(formattedDate);
+		         this.chartData.series[seriesIndex].data.push(formData.score);
+		       } else {
+		         console.error('找不到相应的学科系列');
+		       }
+          // 将新数据添加到雷达图的数据中
+          const subjectIndex = this.radarChartData.categories.indexOf(formData.subject);
+          this.radarChartData.series[0].data[subjectIndex] = formData.score;
+    
+          // 更新页面
+          // 这里你可以调用一个方法来更新页面，或者直接写更新逻辑
+          // 这里只是一个示例，具体实现需要根据你的项目结构来调整
+          this.getData(); // 重新获取数据
+          this.showPopup = false;
+        },
+        fail: (err) => {
+          console.error('添加成绩失败', err);
+        }
+      });
+    },
+  }
 };
 </script>
+
+
 
 
 
