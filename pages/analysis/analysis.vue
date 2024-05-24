@@ -2,14 +2,14 @@
   <div class="container">
     <navBar titleName="成绩分析" />
     <div v-if="loading" class="loading">加载中...</div>
-    
+
     <!-- Chart 1 Container -->
     <div class="chart-container">
       <view class="T1">
         成绩变化图
       </view>
       <view class="charts-box">
-        <qiun-data-charts type="line" :chartData="chartData" />
+        <data_charts type="line" :chartData="echartsData" />
       </view>
     </div>
 
@@ -19,7 +19,7 @@
         学科优劣图
       </view>
       <view class="radar-chart-box">
-        <qiun-data-charts type="radar" :chartData="radarChartData" />
+        <data_charts type="radar" :chartData="radarChartData" />
       </view>
     </div>
 
@@ -31,29 +31,33 @@
     <!-- Popup -->
     <div class="popup" v-show="showPopup">
       <!-- Add Image -->
-      <img src="https://i.postimg.cc/44bTPxrv/image.png" alt="Popup Image" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px 10px 0 0;">
+      <img src="https://i.postimg.cc/44bTPxrv/image.png" alt="Popup Image"
+        style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px 10px 0 0;">
 
       <form @submit="handleSubmit">
-       
 
-          <label class="subject">选择学科</label>
- 
-		<div style="margin-bottom: 10px; display: flex; align-items: center;">
-		  <label class="score" style="margin-right: 10px;">填写学科:</label>
-		  <input type="text" id="subject" v-model="subject"  style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
-		</div>
-       
-   
+
+        <label class="subject">选择学科</label>
+
+        <div style="margin-bottom: 10px; display: flex; align-items: center;">
+          <label class="score" style="margin-right: 10px;">填写学科:</label>
+          <input type="text" id="subject" v-model="subject"
+            style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
+        </div>
+
+
         <div style="margin-bottom: 10px; display: flex; align-items: center;">
           <label class="score" style="margin-right: 10px;">填写成绩:</label>
-          <input type="number" id="score" v-model="score" placeholder="成绩" style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
+          <input type="number" id="score" v-model="score" placeholder="成绩"
+            style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
         </div>
-        
+
         <div style="margin-bottom: 10px; display: flex; align-items: center;">
           <label class="examDate" style="margin-right: 10px;">选择考试日期:</label>
-          <input type="date" id="examDate" v-model="examDate" placeholder="日期" style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
+          <input type="date" id="examDate" v-model="examDate" placeholder="日期"
+            style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;">
         </div>
-        
+
         <div style="display: flex; justify-content: space-between;">
           <button type="button" @click="handleReset" class="round-btn">重置</button>
           <button type="submit" @click="handleSubmit" class="round-btn">提交</button>
@@ -71,48 +75,21 @@
 </template>
 
 <script>
-import { baseUrl } from '@/config.js';	
+import { baseUrl } from '@/config.js';
+import data_charts from '@/components/qiun-data-charts/components/qiun-data-charts/qiun-data-charts';
 export default {
+  components: {
+    data_charts
+  },
   data() {
     return {
-      chartData: {
-        categories: ["2024-4-20","2024-5-02"],
-        series: [
-          {
-            name: "语文", // 学科名称
-            data: [124,126] // 该学科在不同时间点上的成绩数据
-          },
-          {
-            name:"数学",
-            data:[56,78]
-          },
-		  {
-		    name: "英语", // 学科名称
-		    data: [129,132] // 该学科在不同时间点上的成绩数据
-		  },
-		  {
-		    name:"物理",
-		    data:[78,64]
-		  },
-		  {
-		    name: "生物", // 学科名称
-		    data: [94,88] // 该学科在不同时间点上的成绩数据
-		  },
-		  {
-		    name:"化学",
-		    data:[64,69]
-		  },
-		 
-        ]
+      echartsData: {
+        categories: [],
+        series: []
       },
       radarChartData: {
-        categories: ["语文", "数学", "英语", "物理", "化学", "生物"],
-        series: [
-          { 
-            name: "平均成绩", 
-            data: [125,64,130.5,72,90,66] ,
-          }
-        ],
+        categories: [],
+        series: []
       },
       loading: true, // 控制加载提示的显示
       showPopup: false,
@@ -120,7 +97,7 @@ export default {
       score: "",
       examDate: "",
       suggestions: [], // 建议数组
-      username: "lihua",
+      username: "testUser",
     };
   },
   mounted() { //钩子函数 页面加载时自动执行
@@ -133,52 +110,66 @@ export default {
         url: baseUrl + "/score/get",
         method: "GET",
         data: {
-          username: this.username // Assuming you're sending the username as a parameter
+          username: this.username
         },
         success: (res) => {
           console.log(res); // 查看 res 的内容
           // 提取时间、成绩和学科
-          const time = new Date(res.time).toISOString().slice(0, 10); // 仅保留日期部分
-		  console.log("时间是:"+time);
-          const score = parseInt(res.score);
-          const subject = res.subject;
-        
-          // 检查折线图数据中是否已存在相应学科的系列
-          const existingSeriesIndex = this.chartData.series.findIndex(series => series.name === subject);
-        
-          if (existingSeriesIndex !== -1) {
-            // 如果已存在，则将成绩添加到该学科的系列中
-            const existingSeries = this.chartData.series[existingSeriesIndex];
-            const timeIndex = this.chartData.categories.indexOf(time);
-            if (timeIndex !== -1) {
-              existingSeries.data[timeIndex] = score;
-            } else {
-              // 如果时间在 categories 中不存在，则将时间和成绩同时添加到对应位置
-              this.chartData.categories.push(time);
-              existingSeries.data.push(score);
+          const data = res.data;
+          const scoresBySubject = data.reduce((result, item) => {
+            if (!result[item.subject]) {
+              result[item.subject] = [];
             }
-          } else {
-            // 如果不存在，则创建一个新的系列并添加到折线图数据中
-            this.chartData.series.push({
+            result[item.subject].push({ score: item.score, time: item.time });
+            return result;
+          }, {});
+          console.log(scoresBySubject);
+          const xAxisData = [];
+          const seriesData = [];
+          for (const subject in scoresBySubject) {
+            const series = {
               name: subject,
-              data: [score]
-            });
-            // 同时更新横轴数据
-            this.chartData.categories.push(time);
+              data: []
+            };
+            for (const item of scoresBySubject[subject]) {
+              const timeIndex = xAxisData.indexOf(item.time);
+              if (timeIndex === -1) {
+                xAxisData.push(item.time);
+                series.data.push(item.score);
+              } else {
+                series.data[timeIndex] = item.score;
+              }
+            }
+            seriesData.push(series);
           }
-        
+
+          let Linechart = {
+            categories: xAxisData,
+            series: seriesData
+          };
+          this.echartsData = JSON.parse(JSON.stringify(Linechart));
+          console.log(this.echartsData);
+
           // 计算各学科的平均成绩并更新到雷达图数据中
-          const averageScores = {};
-          this.chartData.series.forEach((series) => {
-            const subject = series.name;
-            const scores = series.data;
-            const average = scores.reduce((acc, cur) => acc + cur, 0) / scores.length;
-            averageScores[subject] = average;
+          let subjects = seriesData.map(series => series.name);
+          let averageScores = seriesData.map(series => {
+            let sum = series.data.reduce((a, b) => a + b, 0);
+            let avg = sum / series.data.length;
+            return avg;
           });
-          
-          // 更新雷达图数据
-          this.radarChartData.series[0].data = Object.values(averageScores);
-    
+
+          let radarchart = {
+            categories: subjects,
+            series: [
+              {
+                name: "成交量2",
+                data: averageScores
+              }
+            ]
+          };
+          this.radarChartData = JSON.parse(JSON.stringify(radarchart));
+          console.log(this.radarChartData);
+
           // 更新页面
           this.loading = false;
         },
@@ -188,7 +179,7 @@ export default {
         }
       });
     },
-  
+
     handleReset() {
       this.subject = "";
       this.score = "";
@@ -199,14 +190,14 @@ export default {
       const score = this.score;
       const examDate = new Date(this.examDate);
       const isoDatestring = examDate.toISOString(); // 修改此行
-      const formattedDatestring = isoDatestring.slice(0,23)+ "+00:00";
+      const formattedDatestring = isoDatestring.slice(0, 23) + "+00:00";
       const formData = {
         username: this.username,
         subject: subject,
         score: score,
         time: formattedDatestring
       };
-  
+
       const formDataString = JSON.stringify(formData);
       uni.request({
         url: baseUrl + '/score/add',
@@ -218,18 +209,18 @@ export default {
         success: (res) => {
           console.log('添加成绩成功', res);
           // 将新数据添加到折线统计图的数据中
-		 const seriesIndex = this.chartData.series.findIndex(series => series.name === formData.subject);
-		       if (seriesIndex !== -1) {
-		         const formattedDate = examDate.toISOString().slice(0, 10);
-		         this.chartData.categories.push(formattedDate);
-		         this.chartData.series[seriesIndex].data.push(formData.score);
-		       } else {
-		         console.error('找不到相应的学科系列');
-		       }
+          const seriesIndex = this.chartData.series.findIndex(series => series.name === formData.subject);
+          if (seriesIndex !== -1) {
+            const formattedDate = examDate.toISOString().slice(0, 10);
+            this.chartData.categories.push(formattedDate);
+            this.chartData.series[seriesIndex].data.push(formData.score);
+          } else {
+            console.error('找不到相应的学科系列');
+          }
           // 将新数据添加到雷达图的数据中
           const subjectIndex = this.radarChartData.categories.indexOf(formData.subject);
           this.radarChartData.series[0].data[subjectIndex] = formData.score;
-    
+
           // 更新页面
           // 这里你可以调用一个方法来更新页面，或者直接写更新逻辑
           // 这里只是一个示例，具体实现需要根据你的项目结构来调整
@@ -260,9 +251,12 @@ export default {
 
 /* Add blue border to chart containers */
 .chart-container {
-  border: 2px solid white; /* Blue border color */
-  border-radius: 10px; /* Optional: Rounded border corners */
-  margin-bottom: 20px; /* Optional: Add some space between containers */
+  border: 2px solid white;
+  /* Blue border color */
+  border-radius: 10px;
+  /* Optional: Rounded border corners */
+  margin-bottom: 20px;
+  /* Optional: Add some space between containers */
   margin: 30px;
   background-color: white;
   background-image: linear-gradient(to bottom, #d5f8ff, white 30%);
@@ -348,14 +342,10 @@ input[type="date"] {
   background-color: #24538b;
 }
 
-	
+
 .score,
 .examDate,
-.subject
-{
-	font-size:18px;
+.subject {
+  font-size: 18px;
 }
-
-
-
 </style>
