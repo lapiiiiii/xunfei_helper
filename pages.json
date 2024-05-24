@@ -1,5 +1,14 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	{
+		"path" : "pages/login/login",
+		"style" : 
+		{
+			"navigationBarTitleText" : "",
+			"enablePullDownRefresh" : false
+		}
+	},
+	
 		{
 			"path": "pages/index/index",
 			"style": {
@@ -25,7 +34,16 @@
 				"navigationBarTitleText": "分析"
 			}
 			
+		},
+		{
+			"path" : "pages/my/my",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"enablePullDownRefresh" : false
+			}
 		}
+		
 		
 		
 	],
@@ -42,18 +60,31 @@
 		"list":[
 			{
 				"pagePath": "pages/index/index",
-				"text": "首页"
+				"text": "首页",
+				"iconPath": "static/tabs/home_default.png",
+				"selectedIconPath": "static/tabs/home_selected.png"
 				
 			},
 			{
 				"pagePath": "pages/recite/recite",
-				"text": "背诵助手"
+				"text": "背诵助手",
+				"iconPath": "static/tabs/home_default.png",
+				"selectedIconPath": "static/tabs/home_selected.png"
 
 			},
 			
 			{
 				"pagePath": "pages/analysis/analysis",
-				"text": "分析"
+				"text": "分析",
+				"iconPath": "static/tabs/home_default.png",
+				"selectedIconPath": "static/tabs/home_selected.png"
+				
+			},
+			{
+				"pagePath": "pages/my/my",
+				"text": "我的",
+				"iconPath": "static/tabs/home_default.png",
+				"selectedIconPath": "static/tabs/home_selected.png"
 				
 			}
 		]
