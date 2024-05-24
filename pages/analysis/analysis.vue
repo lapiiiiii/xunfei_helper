@@ -9,7 +9,7 @@
         成绩变化图
       </view>
       <view class="charts-box">
-        <qiun-data-charts type="line" :chartData="chartData" />
+        <data_charts type="line" :chartData="echartsData" />
       </view>
     </div>
 
@@ -19,7 +19,7 @@
         学科优劣图
       </view>
       <view class="radar-chart-box">
-        <qiun-data-charts type="radar" :chartData="radarChartData" />
+        <data_charts type="radar" :chartData="radarChartData" />
       </view>
     </div>
 
@@ -76,25 +76,20 @@
 
 <script>
 import { baseUrl } from '@/config.js';
+import data_charts from '@/components/qiun-data-charts/components/qiun-data-charts/qiun-data-charts';
 export default {
+  components: {
+    data_charts
+  },
   data() {
     return {
-      echartsData : {
-        xAxis: {
-          type: 'category',
-          data: []
-        },
-        yAxis: {
-          type: 'value'
-        },
+      echartsData: {
+        categories: [],
         series: []
       },
       radarChartData: {
-        categories: ['数学', '语文', '英语', '物理', '化学', '生物'],
-        series: [{
-          name: '成绩',
-          data: [0, 0, 0, 0, 0, 0]
-        }]
+        categories: [],
+        series: []
       },
       loading: true, // 控制加载提示的显示
       showPopup: false,
@@ -134,7 +129,6 @@ export default {
           for (const subject in scoresBySubject) {
             const series = {
               name: subject,
-              type: 'line',
               data: []
             };
             for (const item of scoresBySubject[subject]) {
@@ -149,29 +143,32 @@ export default {
             seriesData.push(series);
           }
 
-          const echartsData = {
-            xAxis: {
-              type: 'category',
-              data: xAxisData
-            },
-            yAxis: {
-              type: 'value'
-            },
+          let Linechart = {
+            categories: xAxisData,
             series: seriesData
           };
-          console.log(echartsData);
+          this.echartsData = JSON.parse(JSON.stringify(Linechart));
+          console.log(this.echartsData);
 
           // 计算各学科的平均成绩并更新到雷达图数据中
-          const averageScores = {};
-          this.chartData.series.forEach((series) => {
-            const subject = series.name;
-            const scores = series.data;
-            const average = scores.reduce((acc, cur) => acc + cur, 0) / scores.length;
-            averageScores[subject] = average;
+          let subjects = seriesData.map(series => series.name);
+          let averageScores = seriesData.map(series => {
+            let sum = series.data.reduce((a, b) => a + b, 0);
+            let avg = sum / series.data.length;
+            return avg;
           });
 
-          // 更新雷达图数据
-          this.radarChartData.series[0].data = Object.values(averageScores);
+          let radarchart = {
+            categories: subjects,
+            series: [
+              {
+                name: "成交量2",
+                data: averageScores
+              }
+            ]
+          };
+          this.radarChartData = JSON.parse(JSON.stringify(radarchart));
+          console.log(this.radarChartData);
 
           // 更新页面
           this.loading = false;
