@@ -1,6 +1,16 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 	{
+		"path": "pages/recite/recite",
+		"style": {
+			"navigationStyle":"custom",
+			"enablePullDownRefresh": false,
+			"navigationBarTitleText": "背诵助手"
+		}
+	},
+	
+	
+	{
 		"path" : "pages/login/login",
 		"style" : 
 		{
@@ -18,14 +28,6 @@
 			
 		},
 		
-		{
-			"path": "pages/recite/recite",
-			"style": {
-				"navigationStyle":"custom",
-				"enablePullDownRefresh": false,
-				"navigationBarTitleText": "背诵助手"
-			}
-		},
 		
 		{
 			"path": "pages/analysis/analysis",

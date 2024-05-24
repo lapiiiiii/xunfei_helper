@@ -1,7 +1,9 @@
 <template>
   <div>
-    <navBar titleName="背诵助手" />
-
+    <view class="top-section">
+      <text class="welcome-text"><image src="../../static/index/讯飞星火.png" style="width:20px;height:20px;top:4px;margin-right:7px"/>背诵助手</text>
+    </view>
+	
     <view class="custom-container">
       <div class="container-text">
         <p>哈喽~</p>
@@ -164,13 +166,37 @@ export default {
           // 上传成功
           const data = uploadRes.data;
           // 在这里处理服务器返回的数据
-          console.log('上传成功，服务器de数据是：', data);
-          this.list.push({
-            me: "背诵完成",
-            robot: data
-          })
+          console.log('上传成功，服务器的数据是：', data);
+        
+          // 使用正则表达式匹配百分数之前的数字
+          const matchPercentage = data.match(/(\d+(\.\d+)?)%/);
+          // 如果匹配成功，则提取出百分数之前的数字
+          if (matchPercentage) {
+            const percentage = matchPercentage[1];
+            console.log('提取到的数字是：', percentage);
+            // 获取除去百分号后的数据
+            const data1 = data.replace(/(\d+(\.\d+)?)%/, '');
+            // 构建需要添加到列表的字符串
+            const message = `你背诵的正确率是${percentage}%<br>
+			背诵原文对照：<br>
+			${data1}`;
+            // 将构建的字符串添加到列表中
+            this.list.push({
+              me: "背诵完成",
+              robot: message
+            });
+          } else {
+            // 如果没有匹配到百分数，则直接显示数据
+            this.list.push({
+              me: "背诵完成",
+              robot: data
+            });
+          }
+        
           this.show = false;
         },
+
+
         fail: (err) => {
           // 上传失败
           console.error('上传失败：', err);
@@ -192,6 +218,27 @@ export default {
 $chatContentbgc: #C2DCFF;
 $sendBtnbgc: #4F7DF5;
 
+.top-section {
+  background-color: #6993FF;
+  height: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+  border-radius: 12px; /* 添加圆角边框 */
+   display: flex; /* 将文本设置为 Flex 容器 */
+    align-items: center; /* 垂直居中子元素 */
+}
+
+.welcome-text {
+  color: #fff;
+  font-size: 16px;
+
+  padding-top: 30px;
+  padding-bottom: 10px;
+  text-align:center ;
+}
+
 .hello {
   width: 20px;
 }
@@ -200,13 +247,13 @@ $sendBtnbgc: #4F7DF5;
   margin-top: 20px;
   padding: 10px;
   height: 90px;
-  border: 1px solid #007bff;
+  border: 1px solid  #6993FF;
   /* 蓝色边框 */
   border-radius: 10px;
   /* 圆角 */
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(0, 0, 0, 0.1);
   /* 阴影效果 */
-  background: linear-gradient(to bottom, #007bff, #ffffff);
+  background: linear-gradient(to bottom,  #6993FF, #ffffff);
   /* 渐变背景色 */
   margin-left: 25px;
   width: 80%;
@@ -304,22 +351,23 @@ $sendBtnbgc: #4F7DF5;
 
   .chat-bottom {
     width: 100%;
-    height: 177rpx;
-    background: #F4F5F7;
-
+    height: 100%;
+   background-color: #fff;
     .send-msg {
       display: flex;
       align-items: flex-end;
       padding-left: 80px;
       width: 100%;
-      min-height: 177rpx;
+      min-height: 130rpx;
       position: fixed;
       bottom: 0;
       background: #EDEDED;
+	  border-top-left-radius: 20px;
+	  border-top-right-radius: 20px;
     }
 
     .uni-textarea {
-      padding-bottom: 70rpx;
+      padding-bottom: 30rpx;
 
       textarea {
 
@@ -340,7 +388,7 @@ $sendBtnbgc: #4F7DF5;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 70rpx;
+      margin-bottom: 35rpx;
       margin-left: 25rpx;
       width: 128rpx;
       height: 75rpx;
@@ -394,7 +442,7 @@ $sendBtnbgc: #4F7DF5;
     justify-content: center;
     background-size: cover;
     /* 设置背景图片大小 */
-    margin-bottom: 35px;
+    margin-bottom: 20px;
     margin-left: -60px;
     border-radius: 100%;
 

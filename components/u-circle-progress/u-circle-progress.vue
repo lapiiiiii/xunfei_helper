@@ -24,7 +24,7 @@
  * @tutorial https://www.uviewui.com/components/circleProgress.html
  * @property {String Number} percent 圆环进度百分比值，为数值类型，0-100
  * @property {String} inactive-color 圆环的底色，默认为灰色(该值无法动态变更)（默认#ececec）
- * @property {String} active-color 圆环激活部分的颜色(该值无法动态变更)（默认#19be6b）
+ * @property {String} active-color 圆环激活部分的颜色(该值无法动态变更)
  * @property {String Number} width 整个圆环组件的宽度，高度默认等于宽度值，单位rpx（默认200）
  * @property {String Number} border-width 圆环的边框宽度，单位rpx（默认14）
  * @property {String Number} duration 整个圆环执行一圈的时间，单位ms（默认呢1500）
@@ -55,7 +55,7 @@ export default {
 		// 圆环激活部分的颜色
 		activeColor: {
 			type: String,
-			default: '#19be6b'
+			default: '#6993FF'
 		},
 		// 圆环线条的宽度，单位rpx
 		borderWidth: {

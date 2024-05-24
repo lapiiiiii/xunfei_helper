@@ -68,7 +68,7 @@ export default {
     },
     theme: {
       type: String,
-      default: '#32b99d'
+      default: '#6993FF'
     },
     confirmText: {
       type: String,
