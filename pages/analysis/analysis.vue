@@ -83,17 +83,17 @@ export default {
   },
   data() {
     return {
-     echartsData: {
-           categories: [],
-           series: []
-         },
-         radarChartData: {
-           categories: [],
-           series: []
-         },
+      echartsData: {
+        categories: [],
+        series: []
+      },
+      radarChartData: {
+        categories: [],
+        series: []
+      },
       loading: true, // 控制加载提示的显示
       showPopup: false,
-      subject: "",
+      subject: "数学",
       score: "",
       examDate: "",
       suggestions: [], // 建议数组
