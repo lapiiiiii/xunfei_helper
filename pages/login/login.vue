@@ -1,7 +1,7 @@
 <template>
   <view class="container">
     <!-- 顶部图片 -->
-    <image class="top-image" src="https://th.bing.com/th/id/R.0d4130b66c98887b8c82039a05e0e222?rik=qd4cYYVYCFzBPA&pid=ImgRaw&r=0" mode="widthFix"></image>
+    <image class="top-image" src="../../static/login/页面 1 (3).png" mode="widthFix"></image>
 
     <!-- 输入框区域 -->
     <view class="input-section">
@@ -95,6 +95,7 @@ export default {
   width: 70%; /* 宽度占70% */
   height: 50%; /* 高度占50% */
   margin: auto; /* 居中对齐 */
+  margin-top:-50px;
 }
 
 .input-box {
@@ -102,10 +103,10 @@ export default {
   height: 30px; /* 高度调小 */
   margin: 5px 0; /* 间距调小 */
   padding: 5px; /* 内边距调小 */
-  border: 1px solid #ccc;
+ fonr-size:12px;
   border-radius: 15px;
   background-color: #f0f0f0; /* 灰色背景 */
-  color: gray;
+  color: black;
 }
 
 .input-box::placeholder {
@@ -138,11 +139,11 @@ export default {
 .login-button {
   width: 100%;
   height: 30px; /* 高度调小 */
-  margin-top: 10px; /* 间距调小 */
+  margin-top: 25px; /* 间距调小 */
   background-color:#007bff;
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   text-align: center;
   line-height: 30px; /* 高度调整 */
 }
@@ -156,7 +157,7 @@ export default {
 }
 
 .other-login-text {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   color: #333;
   color:gray;
 }
@@ -165,7 +166,7 @@ export default {
   display: flex;
   justify-content: space-around;
   width: 50%;
-  margin-bottom: 10px;
+  margin-bottom: 28px;
 }
 
 .icon {

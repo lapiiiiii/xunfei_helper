@@ -1616,8 +1616,5 @@ export default {
   align-items: center;
 }
 
- .charts-box {
-    width: 100%;
-    height: 300px;
-  }
+
 </style>

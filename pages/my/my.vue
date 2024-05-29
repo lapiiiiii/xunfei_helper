@@ -1,26 +1,71 @@
 <template>
   <view class="container">
-    <!-- 顶部图片 -->
-    <image class="top-image" src="https://th.bing.com/th/id/R.0d4130b66c98887b8c82039a05e0e222?rik=qd4cYYVYCFzBPA&pid=ImgRaw&r=0" mode="widthFix"></image>
-
-    <!-- 输入框区域 -->
-    <view class="input-section">
-      <input type="text" placeholder="请输入手机号" class="input-box" value="13013012312" disabled />
-      <view class="verification-section">
-        <input type="text" placeholder="请输入验证码" class="input-box" v-model="verificationCode" />
-        <button :class="['verification-button', buttonDisabled ? 'disabled' : '']" @click="sendVerificationCode" :disabled="buttonDisabled">{{ buttonText }}</button>
+    <!-- 头部区域 -->
+    <view class="header">
+      <text class="personal-center">个人中心</text>
+      <view class="profile-area">
+        <view class="avatar-container">
+          <image class="avatar" src="https://img0.baidu.com/it/u=1264336001,1107747499&fm=253&fmt=auto&app=120&f=JPEG?w=608&h=608"></image> <!-- 头像图片 -->
+          <view class="text-container">
+            <div class="name">加油！</div>
+            <div class="homepage">编辑资料</div>
+          </view>
+        </view>
       </view>
+      <!-- 签到按钮浮动到右下角 -->
+      <button class="sign-in-btn" >
+		  <image src="../../static/my/签到.png" style="width:20px;height:20px;top:3px;right:3px;"/>
+        <text>签到</text>
+      </button>
     </view>
 
-    <!-- 底部图标和条款 -->
-    <view class="footer">
-      <view class="social-icons">
-        <image src="../../static/login/微信.png" class="icon" />
-        <image src="../../static/login/QQ.png" class="icon" />
+    <!-- 主体内容区 -->
+    <view class="main">
+      <view class="section">
+        <view class="title-line">
+          <view class="blue-line"></view>
+          <text class="title">我的学习</text>
+        </view>
+        <view class="icon-container">
+          <view class="icon-text">
+            <image class="icon" src="../../static/my/数据.png"></image>
+            <div>我的成绩</div>
+          </view>
+          <view class="icon-text">
+            <image class="icon" src="../../static/my/时间.png"></image>
+            <div>浏览记录</div>
+          </view>
+          <view class="icon-text">
+            <image class="icon" src="../../static/my/视频.png"></image>
+            <div>我的课程</div>
+          </view>
+        </view>
       </view>
-      <view class="agreement">
-        <input type="checkbox" :checked="agreementChecked" @change="toggleAgreement" class="checkbox" />
-        <text>已同意隐私政策和服务条款</text>
+
+      <view class="section">
+        <view class="title-line">
+          <view class="blue-line"></view>
+          <text class="title">其他功能</text>
+        </view>
+        <view class="list-container">
+          <view class="list-item">
+            <text class="item-text">联系客服</text>
+            <text class="arrow">>></text>
+          </view>
+          <view class="list-item">
+            <text class="item-text">反馈</text>
+            <text class="arrow">>></text>
+          </view>
+		  <view class="list-item">
+		    <text class="item-text">版本更新</text>
+		    <text class="arrow">>></text>
+		  </view>
+		  
+		  <view class="list-item">
+		    <text class="item-text">设置</text>
+		    <text class="arrow">>></text>
+		  </view>
+        </view>
       </view>
     </view>
   </view>
@@ -29,122 +74,144 @@
 <script>
 export default {
   data() {
-    return {
-      verificationCode: '',
-      buttonDisabled: false,
-      buttonText: '发送验证码',
-      countdown: 30,
-      agreementChecked: false
-    };
-  },
-  methods: {
-    sendVerificationCode() {
-      if (this.buttonDisabled) return;
-
-      this.buttonDisabled = true;
-      this.buttonText = '已发送(30)';
-      let countdownInterval = setInterval(() => {
-        this.countdown--;
-        this.buttonText = `已发送(${this.countdown})`;
-        if (this.countdown === 0) {
-          clearInterval(countdownInterval);
-          this.buttonDisabled = false;
-          this.buttonText = '发送验证码';
-          this.countdown = 30;
-        }
-      }, 1000);
-    },
-    toggleAgreement() {
-      this.agreementChecked = !this.agreementChecked;
-    }
-  },
-  watch: {
-    verificationCode(newVal) {
-      if (newVal === '608090') {
-        uni.navigateTo({
-          url: '/pages/index/index' // 替换为实际的页面路径
-        });
-      }
-    }
+    return {};
   }
 };
 </script>
 
-<style>
+<style scoped>
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
 }
 
-.top-image {
-  width: 100%;
+.header {
+  background-color: #517DFD;
+  color: white;
+  padding: 10px;
+  position: relative;
   height: 30%;
 }
 
-.input-section {
+.personal-center {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  font-size:20px;
+}
+.name{
+	font-size:20px;
+	margin-bottom:5px;
+}
+
+.section{
+	margin-bottom:20px;
+	margin-top:20px;
+}
+
+.homepage{
+	border:1px solid white ;
+	border-radius: 20px;
+	padding:3px;
+	font-size:12px;
+}
+
+.profile-area {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+}
+
+.avatar-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 50%;
 }
 
-.input-box {
-  width: 80%;
-  height: 40px;
-  margin: 10px 0;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
 }
 
-.verification-section {
-  display: flex;
-  justify-content: space-between;
-  width: 80%;
-}
-
-.verification-button {
-  height: 40px;
+.text-container {
   margin-left: 10px;
-  padding: 0 10px;
-  background-color: #007bff;
-  color: #fff;
+}
+
+.sign-in-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background-color: white;
+  color: black;
   border: none;
-  border-radius: 5px;
+  padding: 3px;
+  border-radius: 10px;
+  font-size:15px;
+  height:40px;
+  width:70px;
+  box-shadow: 0 5px 5px #808080;
 }
 
-.verification-button.disabled {
-  background-color: #ccc;
+.main {
+  background-color:#F7FBFE;
+  height: 70%;
+  padding: 20px;
 }
 
-.footer {
+.title-line {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 20%;
-}
-
-.social-icons {
-  display: flex;
-  justify-content: space-around;
-  width: 50%;
   margin-bottom: 10px;
 }
-
-.icon {
-  width: 40px;
-  height: 40px;
+.title{
+	color:#436CE7;
+	font-weight:bold;
 }
-
-.agreement {
-  display: flex;
-  align-items: center;
-}
-
-.checkbox {
+.blue-line {
+  height: 20px;
+  width: 5px;
+  background-color: #436CE7;
   margin-right: 10px;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.icon-text {
+  text-align: center;
+  font-size:15px;
+  color:gray;
+}
+
+.icon{
+	width:28px;
+	height:28px;
+}
+
+.list-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+ 
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #b1b1b1;
+}
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.arrow {
+  color: #808080;
 }
 </style>

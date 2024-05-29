@@ -5,12 +5,9 @@
     </view>
 	
     <view class="custom-container">
-      <div class="container-text">
-        <p>哈喽~</p>
-        <p>想要检查你的背诵成果吗？</p>
-        <p>先输入你要背诵的古诗文的名字吧~</p>
-        <p>正确的地方会用<span class="right">绿色</span>标出来哦~</p>
-      </div>
+      
+        <image class="post"  src="../../static/recite/页面 1 (1).png"/>
+      
     </view>
 
     <div class="chat">
@@ -231,9 +228,7 @@ $sendBtnbgc: #4F7DF5;
 }
 
 .welcome-text {
-  color: #fff;
   font-size: 16px;
-
   padding-top: 30px;
   padding-bottom: 10px;
   text-align:center ;
@@ -243,30 +238,14 @@ $sendBtnbgc: #4F7DF5;
   width: 20px;
 }
 
-.custom-container {
-  margin-top: 20px;
-  padding: 10px;
-  height: 90px;
-  border: 1px solid  #6993FF;
-  /* 蓝色边框 */
-  border-radius: 10px;
-  /* 圆角 */
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(0, 0, 0, 0.1);
-  /* 阴影效果 */
-  background: linear-gradient(to bottom,  #6993FF, #ffffff);
-  /* 渐变背景色 */
-  margin-left: 25px;
-  width: 80%;
+.post {
+	width:300px;
+	height:120px;
+	margin-left:10%;
+	top:16px;
+	border-radius: 10px;
 }
 
-.container-text {
-  color: #000000;
-  /* 文字颜色 */
-  font-size: 16px;
-  /* 文字大小 */
-  text-align: left;
-  font-weight: bold;
-}
 
 .right {
   color: green;
@@ -379,7 +358,7 @@ $sendBtnbgc: #4F7DF5;
         font-size: 32rpx;
         font-family: PingFang SC;
         color: #333333;
-        line-height: 43rpx;
+        line-height: 30px;
         padding: 5rpx 8rpx;
       }
     }

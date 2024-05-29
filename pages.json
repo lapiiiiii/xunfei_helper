@@ -1,6 +1,26 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 	{
+		"path" : "pages/start/start",
+		"style" : 
+		{
+			"navigationStyle":"custom",
+			"enablePullDownRefresh" : false
+		}
+	},
+	
+	{
+		"path" : "pages/login/login",
+		"style" : 
+		{
+			"navigationStyle":"custom",
+			
+			"enablePullDownRefresh" : false
+		}
+	},
+	
+	
+	{
 		"path": "pages/recite/recite",
 		"style": {
 			"navigationStyle":"custom",
@@ -10,14 +30,6 @@
 	},
 	
 	
-	{
-		"path" : "pages/login/login",
-		"style" : 
-		{
-			"navigationBarTitleText" : "",
-			"enablePullDownRefresh" : false
-		}
-	},
 	
 		{
 			"path": "pages/index/index",
@@ -41,10 +53,20 @@
 			"path" : "pages/my/my",
 			"style" : 
 			{
+				"navigationStyle":"custom",
+				"navigationBarTitleText" : "",
+				"enablePullDownRefresh" : false
+			}
+		},
+		{
+			"path" : "pages/settings/settings",
+			"style" : 
+			{
 				"navigationBarTitleText" : "",
 				"enablePullDownRefresh" : false
 			}
 		}
+		
 		
 		
 		
@@ -57,36 +79,36 @@
 	},
 	"tabBar": {
 		"borderStyle": "black",
-		"selectedColor":"#FB7299",
+		"selectedColor":"#436CE7",
 		"color":"#444444",
 		"list":[
 			{
 				"pagePath": "pages/index/index",
 				"text": "首页",
-				"iconPath": "static/tabs/home_default.png",
-				"selectedIconPath": "static/tabs/home_selected.png"
+				"iconPath": "static/tabar/首页.png",
+				"selectedIconPath": "static/tabar/首页 (1).png"
 				
 			},
 			{
 				"pagePath": "pages/recite/recite",
 				"text": "背诵助手",
-				"iconPath": "static/tabs/home_default.png",
-				"selectedIconPath": "static/tabs/home_selected.png"
+				"iconPath": "static/tabar/全篇背诵.png",
+				"selectedIconPath": "static/tabar/全篇背诵 (1).png"
 
 			},
 			
 			{
 				"pagePath": "pages/analysis/analysis",
 				"text": "分析",
-				"iconPath": "static/tabs/home_default.png",
-				"selectedIconPath": "static/tabs/home_selected.png"
+				"iconPath": "static/tabar/分析.png",
+				"selectedIconPath": "static/tabar/分析 (1).png"
 				
 			},
 			{
 				"pagePath": "pages/my/my",
 				"text": "我的",
-				"iconPath": "static/tabs/home_default.png",
-				"selectedIconPath": "static/tabs/home_selected.png"
+				"iconPath": "static/tabar/我的 (1).png",
+				"selectedIconPath": "static/tabar/我的 (2).png"
 				
 			}
 		]
