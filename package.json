@@ -1,5 +1,10 @@
 {
   "dependencies": {
-    "@qiun/ucharts": "^2.5.0-20230101"
+    "@qiun/ucharts": "^2.5.0-20230101",
+    "base-64": "^1.0.0",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2"
   }
 }

@@ -1,54 +1,56 @@
 <template>
   <div class="container">
-   <view class="top-section">
-     <text class="welcome-text"><image src="../../static/index/讯飞星火.png" style="width:20px;height:20px;top:4px;margin-right:7px"/>背诵助手</text>
-   </view>
+    <view class="top-section">
+      <text class="welcome-text">
+        <image src="../../static/index/讯飞星火.png" style="width:20px;height:20px;top:4px;margin-right:7px" />背诵助手
+      </text>
+    </view>
     <div v-if="loading" class="loading">加载中...</div>
 
-	<view class="page-container">
-	    <!-- 可点击的图片 -->
-		
-		
-	   <view class="right-icon-wrapper" @click="toggleDrawer">
-	     <image src="../../static/analysis/燕尾形.png" class="right-icon-image"/>
-	     <text class="right-icon-text">建议</text>
-	   </view>
+    <view class="page-container">
+      <!-- 可点击的图片 -->
 
-	    <!-- 从右侧划出的抽屉页面 -->
-	    <view :class="['drawer', { 'open': drawerOpen }]" >
-	      <!-- 内容区域 -->
-		  <view class="title">
-			<image src="../../static/index/讯飞星火.png" class="title-icon"/> <!-- 新增图片 -->
-		    学习建议
-		  </view>
 
-	      <view class="content">
-	        2里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容这里是抽屉的内容
-	      </view>
-	      <!-- 收起按钮 -->
-	      <view class="close-btn" @click="toggleDrawer">收起</view>
-	    </view>
+      <view class="right-icon-wrapper" @click="toggleDrawer(); sendToSpark()">
+        <image src="../../static/analysis/燕尾形.png" class="right-icon-image" />
+        <text class="right-icon-text">建议</text>
+      </view>
+
+      <!-- 从右侧划出的抽屉页面 -->
+      <view :class="['drawer', { 'open': drawerOpen }]">
+        <!-- 内容区域 -->
+        <view class="title">
+          <image src="../../static/index/讯飞星火.png" class="title-icon" /> <!-- 新增图片 -->
+          学习建议
+        </view>
+
+        <view class="content">
+          {{ scoreSuggestion }}
+        </view>
+        <!-- 收起按钮 -->
+        <view class="close-btn" @click="toggleDrawer">收起</view>
+      </view>
     </view>
     <!-- Chart 1 Container -->
-   <!-- Chart 1 Container -->
-   <div class="chart-container" v-if=" chartsData.series.length">
-     <view class="T1">
-       成绩变化图
-     </view>
-     <view class="charts-box">
-       <data_charts type="line" :chartData="chartsData" />
-     </view>
-   </div>
-   
-   <!-- Chart 2 Container -->
-   <div class="chart-container" v-if=" radarChartData.series.length">
-     <view class="T1">
-       学科优劣图
-     </view>
-     <view class="radar-chart-box">
-       <data_charts type="radar" :chartData="radarChartData" />
-     </view>
-   </div>
+    <!-- Chart 1 Container -->
+    <div class="chart-container" v-if="chartsData.series.length">
+      <view class="T1">
+        成绩变化图
+      </view>
+      <view class="charts-box">
+        <data_charts type="line" :chartData="chartsData" />
+      </view>
+    </div>
+
+    <!-- Chart 2 Container -->
+    <div class="chart-container" v-if="radarChartData.series.length">
+      <view class="T1">
+        学科优劣图
+      </view>
+      <view class="radar-chart-box">
+        <data_charts type="radar" :chartData="radarChartData" />
+      </view>
+    </div>
 
 
     <!-- Circle Button -->
@@ -60,7 +62,7 @@
     <div class="popup" v-show="showPopup">
       <!-- Add Image -->
       <image src="../../static/analysis/post.png" alt="Popup Image"
-        style="width: 100%; max-height: 120px;  border-radius: 10px 10px 0 0;"/>
+        style="width: 100%; max-height: 120px;  border-radius: 10px 10px 0 0;" />
 
       <form @submit="handleSubmit">
 
@@ -103,12 +105,24 @@
 <script>
 import { baseUrl } from '@/config.js';
 import data_charts from '@/components/qiun-data-charts/components/qiun-data-charts/qiun-data-charts';
+import * as base64 from "base-64";
+import CryptoJS from "crypto-js";
 export default {
   components: {
     data_charts
   },
   data() {
     return {
+      TEXT: '请分析我发给你的成绩信息，然后给出能够改进我的学习的建议',
+      httpUrl: "https://spark-api.xf-yun.com/v3.5/chat",
+      modelDomain: '',
+      APPID: '8203cacb',
+      APISecret: 'YTE4MjM3NWIwYzZkOTUxZWM2ZmY5NDFj',
+      APIKey: '3e21246e8e7a82a4d73233bc7a929dc9',
+      sparkResult: '',
+      historyTextList: [],
+      tempRes: '',
+      scoreSuggestion: '发生了某些错误，无法获取建议',
       chartsData: {
         categories: [],
         series: []
@@ -124,7 +138,7 @@ export default {
       examDate: "",
       suggestions: [], // 建议数组
       username: "testUser",
-	   drawerOpen: false
+      drawerOpen: false
     };
   },
   mounted() { //钩子函数 页面加载时自动执行
@@ -132,9 +146,9 @@ export default {
     this.getData();
   },
   methods: {
-	  toggleDrawer() {
-	        this.drawerOpen = !this.drawerOpen;
-	      },
+    toggleDrawer() {
+      this.drawerOpen = !this.drawerOpen;
+    },
     getData() {
       uni.request({
         url: baseUrl + "/score/get",
@@ -262,6 +276,147 @@ export default {
         }
       });
     },
+
+    //讯飞接口调用
+    async sendToSpark() {
+				let myUrl = await this.getWebSocketUrl();
+				this.tempRes = "";
+				let realThis = this;
+				this.socketTask = uni.connectSocket({
+					url: myUrl,
+					method: 'GET',
+					success: res => {
+						console.log(res, "ws成功连接...", myUrl)
+						realThis.wsLiveFlag = true;
+					}
+				})
+				realThis.socketTask.onError((res) => {
+					console.log("连接发生错误，请检查appid是否填写", res)
+				})
+				realThis.socketTask.onOpen((res) => {
+					this.historyTextList.push({
+						"role": "user",
+						"content": this.TEXT+JSON.stringify(this.chartsData)+JSON.stringify(this.radarChartData)
+					})
+					let params = {
+						"header": {
+							"app_id": this.APPID,
+							"uid": "aef9f963-7"
+						},
+						"parameter": {
+							"chat": {
+								"domain": this.modelDomain,
+								"temperature": 0.5,
+								"max_tokens": 1024
+							}
+						},
+						"payload": {
+							"message": {
+								"text": this.historyTextList
+							}
+						}
+					};
+					console.log("请求的params：" + JSON.stringify(params))
+					this.sparkResult = this.sparkResult + "\r\n我：" + this.TEXT + "\r\n"
+					this.sparkResult = this.sparkResult + "大模型："
+					console.log("发送第一帧...", params)
+					realThis.socketTask.send({ // 发送消息，，都用uni的官方版本
+						data: JSON.stringify(params),
+						success() {
+							console.log('第一帧发送成功')
+						}
+					});
+				});
+
+				// 接受到消息时
+				realThis.socketTask.onMessage((res) => {
+					console.log('收到API返回的内容：', res.data);
+					let obj = JSON.parse(res.data)
+					// console.log("我打印的"+obj.payload);
+					let dataArray = obj.payload.choices.text;
+					for (let i = 0; i < dataArray.length; i++) {
+						realThis.sparkResult = realThis.sparkResult + dataArray[i].content
+						realThis.tempRes = realThis.tempRes + dataArray[i].content
+					}
+          this.scoreSuggestion = realThis.tempRes;
+
+					// realThis.sparkResult =realThis.sparkResult+ 
+					let temp = JSON.parse(res.data)
+					// console.log("0726",temp.header.code)
+					if (temp.header.code !== 0) {
+						console.log(`${temp.header.code}:${temp.message}`);
+						realThis.socketTask.close({
+							success(res) {
+								console.log('关闭成功', res)
+								realThis.wsLiveFlag = false;
+							},
+							fail(err) {
+								console.log('关闭失败', err)
+							}
+						})
+					}
+					if (temp.header.code === 0) {
+						if (res.data && temp.header.status === 2) {
+							realThis.sparkResult = realThis.sparkResult +
+								"\r\n**********************************************"
+							this.historyTextList.push({
+								"role": "assistant",
+								"content": this.tempRes
+							})
+							setTimeout(() => {
+								realThis.socketTask.close({
+									success(res) {
+										console.log('关闭成功', res)
+									},
+									fail(err) {
+										// console.log('关闭失败', err)
+									}
+								})
+							}, 1000)
+						}
+					}
+				})
+			},
+      getWebSocketUrl() {
+				console.log(this.httpUrl)
+				var httpUrlHost = (this.httpUrl).substring(8, 28);
+				var httpUrlPath = (this.httpUrl).substring(28);
+				console.log(httpUrlHost)
+				console.log(httpUrlPath)
+				switch (httpUrlPath) {
+					case "/v1.1/chat":
+						this.modelDomain = "general";
+						break;
+					case "/v2.1/chat":
+						this.modelDomain = "generalv2";
+						break;
+					case "/v3.1/chat":
+						this.modelDomain = "generalv3";
+						break;
+					case "/v3.5/chat":
+						this.modelDomain = "generalv3.5";
+						break;
+				}
+				console.log(this.modelDomain)
+				return new Promise((resolve, reject) => {
+					var url = "wss://"+httpUrlHost+httpUrlPath;
+					var host = "spark-api.xf-yun.com";
+					var apiKeyName = "api_key";
+					var date = new Date().toGMTString();
+					var algorithm = "hmac-sha256";
+					var headers = "host date request-line";
+					var signatureOrigin = `host: ${host}\ndate: ${date}\nGET ${httpUrlPath} HTTP/1.1`;
+					var signatureSha = CryptoJS.HmacSHA256(signatureOrigin, this.APISecret);
+					var signature = CryptoJS.enc.Base64.stringify(signatureSha);
+					var authorizationOrigin =
+						`${apiKeyName}="${this.APIKey}", algorithm="${algorithm}", headers="${headers}", signature="${signature}"`;
+					var authorization = base64.encode(authorizationOrigin);
+					url = `${url}?authorization=${authorization}&date=${encodeURI(date)}&host=${host}`;
+
+					// console.log(url)
+					resolve(url); // 主要是返回地址
+				});
+			},
   }
 };
 </script>
@@ -281,10 +436,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
-  border-radius: 12px; /* 添加圆角边框 */
-   display: flex; /* 将文本设置为 Flex 容器 */
-    align-items: center; /* 垂直居中子元素 */
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2);
+  /* 添加阴影效果 */
+  border-radius: 12px;
+  /* 添加圆角边框 */
+  display: flex;
+  /* 将文本设置为 Flex 容器 */
+  align-items: center;
+  /* 垂直居中子元素 */
 }
 
 .welcome-text {
@@ -293,8 +452,9 @@ export default {
 
   padding-top: 30px;
   padding-bottom: 10px;
-  text-align:center ;
+  text-align: center;
 }
+
 /* Add blue border to chart containers */
 .chart-container {
   /* Blue border color */
@@ -378,9 +538,9 @@ input[type="date"] {
   height: 37px;
   border-radius: 20px;
   cursor: pointer;
-  color:black;
-  border:1px solid gray;
-  line-height:37px;
+  color: black;
+  border: 1px solid gray;
+  line-height: 37px;
 }
 
 .round-btn2 {
@@ -391,7 +551,7 @@ input[type="date"] {
   background-color: #5187FC;
   color: white;
   border: none;
-  line-height:37px;
+  line-height: 37px;
 }
 
 .round-btn:hover {
@@ -407,20 +567,26 @@ input[type="date"] {
 
 .page-container {
   position: relative;
-}.right-icon-wrapper {
+}
+
+.right-icon-wrapper {
   position: fixed;
   top: 50px;
   right: 1px;
-  width: 60px; /* 图标的宽度 */
-  height: 60px; /* 图标的高度 */
+  width: 60px;
+  /* 图标的宽度 */
+  height: 60px;
+  /* 图标的高度 */
   display: flex;
   align-items: center;
-  justify-content: center; /* 水平和垂直居中 */
+  justify-content: center;
+  /* 水平和垂直居中 */
   cursor: pointer;
 }
 
 .right-icon-image {
-  position: absolute; /* 绝对定位，覆盖整个容器 */
+  position: absolute;
+  /* 绝对定位，覆盖整个容器 */
   top: 0;
   right: 0;
   bottom: 0;
@@ -430,47 +596,60 @@ input[type="date"] {
 }
 
 .right-icon-text {
-  position: absolute; /* 绝对定位，覆盖图片 */
+  position: absolute;
+  /* 绝对定位，覆盖图片 */
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  color: fff; /* 文本颜色 */
-  font-size: 17px; /* 文本大小 */
-  text-align: right; /* 文本水平居中 */
-  line-height: 60px; /* 使文本垂直居中 */
+  color: fff;
+  /* 文本颜色 */
+  font-size: 17px;
+  /* 文本大小 */
+  text-align: right;
+  /* 文本水平居中 */
+  line-height: 60px;
+  /* 使文本垂直居中 */
   font-weight: bold;
-  text-shadow:  0 5px 5px rgba(255, 255, 255, 0.5); /* 添加阴影 */
+  text-shadow: 0 5px 5px rgba(255, 255, 255, 0.5);
+  /* 添加阴影 */
 }
 
 
 
 .drawer {
   position: fixed;
-  right: -100%; /* 初始隐藏在视图外 */
+  right: -100%;
+  /* 初始隐藏在视图外 */
   top: 0;
   width: 100%;
   height: 100%;
   background-image: url("https://gd-hbimg.huaban.com/e02c70fe009f1ff9ce9f5dffb26ffeaf6a6a8cddb810-sfBIgh_fw658webp");
   transition: right 0.3s;
-  background-size: 140% 100%; /* 拉伸图像以完全匹配元素的大小 */
-   background-repeat: no-repeat; /* 不重复图像 */
-    background-position: center; /* 图像居中显示 */
+  background-size: 140% 100%;
+  /* 拉伸图像以完全匹配元素的大小 */
+  background-repeat: no-repeat;
+  /* 不重复图像 */
+  background-position: center;
+  /* 图像居中显示 */
 }
 
 .drawer {
   position: fixed;
-  right: -100%; /* 初始隐藏在视图外 */
+  right: -100%;
+  /* 初始隐藏在视图外 */
   top: 0;
   width: 100%;
   height: 100%;
   background-color: white;
   transition: right 0.3s;
-  z-index: 101; /* 确保在遮罩层上方 */
+  z-index: 101;
+  /* 确保在遮罩层上方 */
 }
 
 .drawer.open {
-  right: 0; /* 划出 */
+  right: 0;
+  /* 划出 */
 }
 
 
@@ -486,33 +665,44 @@ input[type="date"] {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 120px;
-  display: flex; /* 使用Flex布局 */
-  align-items: center; /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
+  display: flex;
+  /* 使用Flex布局 */
+  align-items: center;
+  /* 垂直居中 */
+  justify-content: center;
+  /* 水平居中 */
   margin-left: 30%;
   margin-top: 15%;
 
 }
 
 .title-icon {
-  width: 30px; /* 根据实际情况调整图标大小 */
-  height: 30px; /* 根据实际情况调整图标大小 */
-  margin-right: 10px; /* 在图标和文字之间添加一些空间 */
+  width: 30px;
+  /* 根据实际情况调整图标大小 */
+  height: 30px;
+  /* 根据实际情况调整图标大小 */
+  margin-right: 10px;
+  /* 在图标和文字之间添加一些空间 */
 }
 
 
 .content {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 垂直居中 */
-  align-items: center; /* 水平居中 */
+  justify-content: center;
+  /* 垂直居中 */
+  align-items: center;
+  /* 水平居中 */
   padding: 52px;
-  height: 100%; /* 设置高度为100%以支持垂直居中 */
-  font-size: 15px; /* 字体大小设置为20px */
-  color: #333; /* 可以调整字体颜色 */
-  line-height:40px;
-  text-indent:2em;
-  margin-top:-105px;
+  height: 100%;
+  /* 设置高度为100%以支持垂直居中 */
+  font-size: 15px;
+  /* 字体大小设置为20px */
+  color: #333;
+  /* 可以调整字体颜色 */
+  line-height: 40px;
+  text-indent: 2em;
+  margin-top: -105px;
 
 }
 
@@ -522,19 +712,27 @@ input[type="date"] {
   right: 10px;
   bottom: 10px;
   padding: 10px;
-  color: #5187FC; /* 按钮文本颜色 */
-  font-size: 14px; /* 字体大小 */
-  font-weight: bold; /* 字体加粗 */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* 更细致的文本阴影 */
-  background-color: #f0f8ff; /* 淡蓝色背景 */
-  border-radius: 10px; /* 圆角 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 盒子阴影 */
-  width: auto; /* 自动宽度 */
-  min-width: 50px; /* 最小宽度 */
+  color: #5187FC;
+  /* 按钮文本颜色 */
+  font-size: 14px;
+  /* 字体大小 */
+  font-weight: bold;
+  /* 字体加粗 */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  /* 更细致的文本阴影 */
+  background-color: #f0f8ff;
+  /* 淡蓝色背景 */
+  border-radius: 10px;
+  /* 圆角 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  /* 盒子阴影 */
+  width: auto;
+  /* 自动宽度 */
+  min-width: 50px;
+  /* 最小宽度 */
   display: inline-block;
   cursor: pointer;
   text-align: center;
 
 }
-
 </style>
